@@ -6,11 +6,12 @@ This system completely abandons the traditional "multi-factor equal-weight stew"
 
 ## 🧠 Core Architecture: The Trinity Digital Twin
 
-The system follows a three-tier evolutionary structure to ensure entropy reduction and absolute purity in decision-making:
+The system follows a strict physical hierarchy to ensure the underlying logic remains immutable, while upper-level beliefs can continuously evolve with data:
 
 *   **[Tier 1] The Sea of Perception (Inbox)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
 *   **[Tier 2] The Subconscious Network (ClawRAG)** - Association and Flow. Responsible for vectorized, intuitive retrieval of Tier 1 data.
-*   **[Tier 3] The Cognitive Anchor (Ontology Map)** - Essence and Law. This is the "Soul" of the digital twin, recording absolute definitions of the world. **Boundary:** Ground Truth. Tampering is strictly prohibited without explicit user authorization.
+*   **[Tier 2.5] The Belief Store** - Deduction and Calibration. **[Where Evolution Happens]**. Stores the system's directional conclusions and derived market states (e.g., "Macro is bullish", "Extreme panic"). **Boundary:** Beliefs are probabilistic objects. They must be continuously calibrated, overwritten, or rolled back as new Evidence arrives via Bayesian updates.
+*   **[Tier 3] The Cognitive Anchor (Ontology Map)** - Essence and Law. This is the "Soul" of the digital twin. **Boundary:** Absolute Ground Truth. Tier 3 MUST ONLY store objective "Definitions", "Mathematical Methodologies" (e.g., Z-Score formulas), and "System Constraints". **It is strictly prohibited to hardcode any directional or emotional subjective conclusions (Beliefs) into Tier 3.** Tier 3 is the ruler; it does not record the length of what it measures.
 
 ---
 
@@ -66,11 +67,12 @@ To deploy this system locally, the scripts require the following APIs:
 
 ## 🧠 核心架构：三位一体数字分身 (Trinity Digital Twin Architecture)
 
-系统遵循三重境界的升维演化，确保信息降熵和决策的绝对纯粹：
+系统遵循严密的物理层级隔离，确保底层逻辑不可篡改，而上层信念可以随数据持续演化：
 
 *   **L1：感知之海 (Inbox)** - 混沌与包容。接纳所有未经雕琢的原始信息碎片。**物理边界**：仅限追加 (Append-only)，保留真实。
 *   **L2：潜意识网络 (ClawRAG)** - 联想与流转。负责对 L1 的数据进行向量化直觉检索。
-*   **L3：认知定海神针 (Ontology Map)** - 本质与法则。这是数字孪生的“元神”，记录了对世界的绝对定义。**物理边界**：绝对真理 (Ground Truth)，未经显式授权禁止篡改。
+*   **L2.5：信念层 (Belief Store)** - 演绎与校准。**[系统演化的发生地]**。存放系统推演出的方向性结论（如“当前宏观偏多”、“情绪极度恐慌”）。**物理边界**：信念是概率对象，随着最新证据 (Evidence) 的涌入，必须通过贝叶斯公式不断被校准、覆写、回滚。
+*   **L3：认知定海神针 (Ontology Map)** - 本质与法则。这是数字孪生的“元神”。**物理边界**：绝对真理 (Ground Truth)。L3 只能存储“客观定义”、“数学口径（如 Z-Score 的计算公式）”和“系统约束红线”。**严禁将任何方向性、情绪性的主观结论（Belief）固化在 L3 中。** L3 是一把绝对的尺子，不负责记录当前测量的结果，更不可被随意篡改。
 
 ---
 
