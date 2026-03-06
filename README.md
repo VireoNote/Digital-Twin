@@ -38,13 +38,16 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 *   🌩️ **Crypto Extreme Weather Agent (`crypto-extreme-weather`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
 *   🪙 **Crypto Micro Climate Agent (`crypto-micro`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
 
-### Step 5: The Probability Matrix & Bayesian Final Directive
-The L3 Forecasting Center synthesizes the 6-dimensional data using strict **Bayesian Inference** rather than linear weighted summation:
-1. **Prior Probability $P(Bull)$**: Derived from the Macro Base (Step 1) and Narrative Premium (Step 2).
-2. **Evidence $E$**: The current micro-state (e.g., severe OI liquidation, dead stablecoin velocity) captured by Fast Variables (Step 3 & 4).
-3. **Posterior Probability $P(Bull|E)$**: The system calculates the ultimate win-rate by computing $\frac{P(E|Bull) \cdot P(Bull)}{P(E)}$. This ruthlessly corrects human bias—even if the macro is extremely bullish ($P(Bull)=0.7$), if the micro-evidence shows severe liquidity drainage, the posterior probability will plummet, preventing dangerous bottom-fishing.
-4. **Kelly Criterion Mapping**: Calculates the maximum suggested risk exposure based on the Bayesian posterior win-rate.
-5. **Digital Twin Final Directive**: Direct, actionable commands broken down by Spot, Longs, and Shorts.
+### Step 5: Multi-Timeframe Discriminative Models & Layered Execution
+The L3 Forecasting Center completely abandons the "Bayesian Likelihood Patchwork" and adopts a **Multi-Timeframe Discriminative Architecture**. It splits the prediction into three independent supervised learning tasks, each passing through strict **out-of-sample probability calibration** (Platt/Isotonic):
+1. **30d Strategic Tailwind ($P_{30d\_Tailwind}$)**: Predicts if the next 30 days offer a positive risk-adjusted environment. **Execution**: Dictates the baseline direction for spot holdings and maximum risk budget.
+2. **7d Narrative Continuation ($P_{7d\_Continuation}$)**: Predicts if current mid-term trends will persist. **Execution**: Dictates whether to add rolling hedges or reduce net-long exposure.
+3. **24h Adverse Risk ($P_{24h\_Adverse\_Risk}$)**: A **Risk Gate**. Predicts the probability of severe adverse excursions or deleveraging events within 24 hours. **Execution**: High risk triggers leverage shutdown and protective puts; low risk clears the path for execution.
+
+**Engineering Pillars:**
+*   **Regime Gate**: Models are *Regime-aware*. A separate module (e.g., HMM) acts purely as a "Weather Forecaster" (e.g., `Loose Liquidity`, `Panic`), routing samples or altering conditional mappings rather than issuing direct trade signals.
+*   **Empirical Bayes Shrinkage**: Bayes is demoted from a global framework to a robust tool for sparse statistics. It uses Beta-Binomial shrinkage to prevent overconfidence in rare buckets (e.g., historically rare combinations of high funding and low volume).
+*   **Collinearity Control**: Evidence overlap is managed at the feature level via `overlap_groups`, aggregation, or monotonic constraints, NOT by hacking posterior probabilities.
 
 ---
 
@@ -102,13 +105,16 @@ To deploy this system locally, the scripts require the following APIs:
 *   🌩️ **加密雷暴预警专员 (`crypto-extreme-weather`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
 *   🪙 **局部微气候加密专员 (`crypto-micro`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
 
-### 步骤 5：贝叶斯后验矩阵与终极指令
-L3 预报中心彻底摒弃线性加权求和，必须通过**贝叶斯公式**完成 6 维数据的降维打击：
-1. **先验概率 $P(Bull)$**：由宏观底色（慢变量）与叙事溢价（预期变量）得出基础多头胜率。
-2. **观测证据 $E$**：由体感温度专员和雷暴预警专员抓取到的最新微观异动（如：剧烈的多头踩踏、流速枯竭等）。
-3. **后验概率 $P(Bull|E)$**：计算 $\frac{P(E|Bull) \cdot P(Bull)}{P(E)}$。利用此公式对抗人性偏见——即使宏观再好 ($P(Bull)=0.7$)，只要微观出现了极其恶劣的流动性断裂，贝叶斯公式也会冷酷地将最终胜率暴降，压制抄底冲动。
-4. **凯利公式仓位映射 (Kelly Criterion)**：根据贝叶斯后验胜率，计算出严谨的最高头寸风险敞口。
-5. **数字分身终极操作建议**：向现货、多头、空头三种仓位下达干脆的交易动作指令。
+### 步骤 5：多时域判别式后验与分层执行
+L3 预报中心彻底放弃“拼凑似然”的古典贝叶斯后验推导，转向**“多时域判别式模型 + Regime Gate”**的工业级量化架构。系统将预测拆分为三个独立但可协同的监督学习任务，并在严格的**时间序列样本外进行概率校准**（Platt/Isotonic）：
+1. **30d 战略顺风 ($P_{30d\_Tailwind}$)**：预测未来 30 天是否提供正的战略顺风环境。**执行权限**：决定核心**现货的基准方向**和最大风险预算（管底仓）。
+2. **7d 中期延续 ($P_{7d\_Continuation}$)**：预测当前中期叙事是否延续。**执行权限**：决定是否增加滚动对冲、降低净多暴露（管倾斜）。
+3. **24h 短线不利风险 ($P_{24h\_Adverse\_Risk}$)**：这是一个**风险闸门**，预测未来 24h 内是否出现超预期的踩踏或去杠杆。**执行权限**：高风险时关闭杠杆、暂停开仓；低风险时放行（管刹车）。
+
+**三大工程支柱：**
+*   **Regime Gate (环境门卫)**：HMM 等状态机退居幕后，只提供“天气标签”（如 `大放水`, `恐慌去杠杆`），让主模型成为 *Regime-aware*，在不同天气下采用不同的条件概率映射，而不直接发号施令。
+*   **经验贝叶斯收缩 (Empirical Bayes Shrinkage)**：贝叶斯从“全局推导口号”退回到“局部稀疏统计工具”。使用 Beta-Binomial 收缩防止系统在遭遇历史罕见切片（Rare Bucket）时过度自信。
+*   **特征层共线性管制 (Collinearity Control)**：废除在后验层硬相乘的逻辑。通过 `overlap_group` 打标，在特征进入模型前执行分组聚合或限额，显著降低冗余证据对同一叙事的重复放大。
 
 ---
 
