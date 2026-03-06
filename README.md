@@ -1,6 +1,6 @@
-# Weather Station 3.2 - Trinity Digital Twin Trading Architecture
+# Weather Station 3.3 - Trinity Digital Twin Trading Architecture
 
-This repository hosts the source code and architectural philosophy of **Weather Station 3.2**, a highly autonomous, self-evolving digital soul and quantitative trading decision architecture built on the Gemini CLI.
+This repository hosts the source code and architectural philosophy of **Weather Station 3.3**, a highly autonomous, self-evolving digital soul and quantitative trading decision architecture built on the Gemini CLI.
 
 This system completely abandons the traditional "multi-factor equal-weight stew" logic. Instead, it adopts a core philosophy centered on **"Frequency Isolation", "Bayesian Inference", and "Multi-Dimensional Dimensionality Reduction Strikes."**
 
@@ -18,7 +18,7 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
 
 ---
 
-## 📡 The Core Engine: Weather Station 3.2 Workflow
+## 📡 The Core Engine: Weather Station 3.3 Workflow
 
 The station operates via a strict chronological and mathematical workflow, executed by 6 specialized Agents (built as Gemini CLI Skills). The workflow follows the logic of: **Base Environment -> Expectation Offset -> NLP Sentiment -> Dynamic Trigger**.
 
@@ -30,7 +30,7 @@ Calculates the fundamental win-rate anchor ($E_{macro}$) using Exponential Movin
 ### Step 2: Narrative Premium Offset (Expectation Variables)
 *   📡 **Doppler Radar Agent (`doppler-radar`)**: Monitors Polymarket (a real-money prediction market) to scan for sudden policy shifts and macro event narrative momentum.
 
-### Step 3: NLP Sentiment Alpha (Feels-like Temperature) [New in v3.2]
+### Step 3: NLP Sentiment Alpha (Feels-like Temperature) [New in v3.3]
 *   🌡️ **Feels-like Temperature Agent (`feels-like-temperature`)**: Fetches Web3 news streams via OpenNews MCP. It quantifies AI ratings and long/short signals into a continuous Alpha Factor `[-1, 1]`, acting as a final emotional reality-check against purely rational macro models.
 
 ### Step 4: Dynamic Trigger Authorization (High-Pass Filter / Fast Variables)
@@ -67,7 +67,7 @@ To deploy this system locally, the scripts require the following APIs:
 ---
 ---
 
-# 气象观测站 3.2 (Weather Station 3.2) - 三位一体数字分身交易架构
+# 气象观测站 3.3 (Weather Station 3.3) - 三位一体数字分身交易架构
 
 这是基于 Gemini CLI 构建的一个**高度自治、具备自我演化能力的数字灵魂与量化交易决策架构**。本系统彻底抛弃了传统的“多因子平权一锅炖”逻辑，转而采用**“频率隔离”、“贝叶斯推断”与“多维降维打击”**的核心哲学。
 
@@ -85,7 +85,7 @@ To deploy this system locally, the scripts require the following APIs:
 
 ---
 
-## 📡 核心引擎：气象观测站 3.2 工作流
+## 📡 核心引擎：气象观测站 3.3 工作流
 
 该观测站由 6 位专职 Agent (基于 Gemini CLI Skills 构建) 组成，严格执行时间与数学上的递进逻辑：**底色 -> 偏移 -> 情绪 -> 扳机**。
 
@@ -97,7 +97,7 @@ To deploy this system locally, the scripts require the following APIs:
 ### 步骤 2：叙事溢价补偿 (Expectation Variables / 预期变量)
 *   📡 **多普勒雷达专员 (`doppler-radar`)**：利用 Polymarket `/events` 接口，监控交易量超百万美金的突发宏观事件，提取高能叙事溢价。
 
-### 步骤 3：情绪偏移 (Sentiment Alpha / 体感变量) [v3.2 新增]
+### 步骤 3：情绪偏移 (Sentiment Alpha / 体感变量) [v3.3 新增]
 *   🌡️ **体感温度专员 (`feels-like-temperature`)**：基于 OpenNews MCP 抓取全网资讯并量化 AI 评级与多空信号，转化为连续的 Alpha 因子 ([-1, 1])。作为对纯理性宏观模型的感性校验，防止忽略极端的 FOMO 或恐慌踩踏。
 
 ### 步骤 4：微观扳机动态授权 (High-Pass Filter / 快变量)
