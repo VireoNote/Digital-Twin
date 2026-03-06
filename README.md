@@ -34,12 +34,13 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 *   🌩️ **Crypto Extreme Weather Agent (`crypto-extreme-weather`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
 *   🪙 **Crypto Micro Climate Agent (`crypto-micro`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
 
-### Step 5: The Probability Matrix & Final Directive
-The L3 Forecasting Center synthesizes the 6-dimensional data into a strict **Probability Matrix** instead of single-direction predictions. The output must include:
-1. **Base Case & Tail Risks**: Probabilities for different market scenarios.
-2. **Kelly Criterion Mapping**: Calculates the maximum suggested risk exposure based on win-rate and odds (e.g., "$f^* = \frac{bp-q}{b}$").
-3. **Invalidation Nodes**: Explicitly defines the physical boundaries that would immediately invalidate the current base case.
-4. **Digital Twin Final Directive**: Direct, actionable commands broken down by Spot, Longs, and Shorts.
+### Step 5: The Probability Matrix & Bayesian Final Directive
+The L3 Forecasting Center synthesizes the 6-dimensional data using strict **Bayesian Inference** rather than linear weighted summation:
+1. **Prior Probability $P(Bull)$**: Derived from the Macro Base (Step 1) and Narrative Premium (Step 2).
+2. **Evidence $E$**: The current micro-state (e.g., severe OI liquidation, dead stablecoin velocity) captured by Fast Variables (Step 3 & 4).
+3. **Posterior Probability $P(Bull|E)$**: The system calculates the ultimate win-rate by computing $\frac{P(E|Bull) \cdot P(Bull)}{P(E)}$. This ruthlessly corrects human bias—even if the macro is extremely bullish ($P(Bull)=0.7$), if the micro-evidence shows severe liquidity drainage, the posterior probability will plummet, preventing dangerous bottom-fishing.
+4. **Kelly Criterion Mapping**: Calculates the maximum suggested risk exposure based on the Bayesian posterior win-rate.
+5. **Digital Twin Final Directive**: Direct, actionable commands broken down by Spot, Longs, and Shorts.
 
 ---
 
@@ -93,12 +94,13 @@ To deploy this system locally, the scripts require the following APIs:
 *   🌩️ **加密雷暴预警专员 (`crypto-extreme-weather`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
 *   🪙 **局部微气候加密专员 (`crypto-micro`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
 
-### 步骤 5：概率矩阵与终极指令输出
-L3 预报中心在输出最终报告时，必须将 6 维数据融合为极具实战意义的研判体系：
-1. **概率矩阵 (Probability Matrix)**：输出基准情景 (Base Case)、尾部风险 (Tail Risk) 与上行惊喜的发生概率。
-2. **凯利公式仓位映射 (Kelly Criterion)**：根据估算胜率和赔率，建议绝对的最大资金敞口。
-3. **失效节点 (Invalidation Nodes)**：明确定出打破当前概率预期的“物理红线”。
-4. **数字分身终极操作建议**：用最具指令性的语言，向现货、多头、空头三种仓位下达干脆的交易动作指令。
+### 步骤 5：贝叶斯后验矩阵与终极指令
+L3 预报中心彻底摒弃线性加权求和，必须通过**贝叶斯公式**完成 6 维数据的降维打击：
+1. **先验概率 $P(Bull)$**：由宏观底色（慢变量）与叙事溢价（预期变量）得出基础多头胜率。
+2. **观测证据 $E$**：由体感温度专员和雷暴预警专员抓取到的最新微观异动（如：剧烈的多头踩踏、流速枯竭等）。
+3. **后验概率 $P(Bull|E)$**：计算 $\frac{P(E|Bull) \cdot P(Bull)}{P(E)}$。利用此公式对抗人性偏见——即使宏观再好 ($P(Bull)=0.7$)，只要微观出现了极其恶劣的流动性断裂，贝叶斯公式也会冷酷地将最终胜率暴降，压制抄底冲动。
+4. **凯利公式仓位映射 (Kelly Criterion)**：根据贝叶斯后验胜率，计算出严谨的最高头寸风险敞口。
+5. **数字分身终极操作建议**：向现货、多头、空头三种仓位下达干脆的交易动作指令。
 
 ---
 
