@@ -13,7 +13,7 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Tier 2.1 Semantic Memory**: Vector DB for text, news, and narrative retrieval.
     *   **Tier 2.2 Feature Store**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
     *   **Tier 2.3 Evidence Graph**: Links different projections of the "same underlying event" (e.g., Fed cuts seen in News + Polymarket + Yields) into a single causal node, preventing catastrophic multi-counting in Bayesian inference.
-*   **[Tier 2.5] The Belief Store** - Deduction and Calibration. **[Where Evolution Happens]**. Stores the system's directional conclusions and derived market states (e.g., "Macro is bullish", "Extreme panic"). **Boundary:** Beliefs are probabilistic objects. They must be continuously calibrated, overwritten, or rolled back as new Evidence arrives via Bayesian updates.
+*   **[Tier 2.5] The State Register (Formerly Belief Store)** - Deduction and Calibration. **[Where Evolution Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
 *   **[Tier 3] The Cognitive Anchor (Ontology Map)** - Essence and Law. This is the "Soul" of the digital twin. **Boundary:** Absolute Ground Truth. Tier 3 MUST ONLY store objective "Definitions", "Mathematical Methodologies" (e.g., Z-Score formulas), and "System Constraints". **It is strictly prohibited to hardcode any directional or emotional subjective conclusions (Beliefs) into Tier 3.** Tier 3 is the ruler; it does not record the length of what it measures.
 
 ---
@@ -80,7 +80,7 @@ To deploy this system locally, the scripts require the following APIs:
     *   **L2.1 语义记忆 (Semantic Memory)**：向量库，仅负责新闻、文本、研报的向量化召回与模糊联想。
     *   **L2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
     *   **L2.3 证据图谱 (Evidence Graph)**：消除多重共线性（Multi-collinearity）。把“同一件事”在新闻、Polymarket、价格中的多个投影连起来，防止在后验推断中被多次重复加分。
-*   **L2.5：信念层 (Belief Store)** - 演绎与校准。**[系统演化的发生地]**。存放系统推演出的方向性结论（如“当前宏观偏多”、“情绪极度恐慌”）。**物理边界**：信念是概率对象，随着最新证据 (Evidence) 的涌入，必须通过贝叶斯公式不断被校准、覆写、回滚。
+*   **L2.5：状态寄存器 (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
 *   **L3：认知定海神针 (Ontology Map)** - 本质与法则。这是数字孪生的“元神”。**物理边界**：绝对真理 (Ground Truth)。L3 只能存储“客观定义”、“数学口径（如 Z-Score 的计算公式）”和“系统约束红线”。**严禁将任何方向性、情绪性的主观结论（Belief）固化在 L3 中。** L3 是一把绝对的尺子，不负责记录当前测量的结果，更不可被随意篡改。
 
 ---
