@@ -8,11 +8,17 @@
   - 将所有未处理的输入、聊天记录、剪藏以 `.md` 格式存入。
   - **仅限追加 (Append-only)**：摄入阶段严禁分类、解析或修改原文。保持原始真实性。
 
-### L2：潜意识网络 (ClawRAG) - 联想与流转
-- **物理路径**：`/home/liwu/digital_twin/ClawRAG/`
-- **执行边界**：
-  - 自动触发向量化嵌入与索引（对齐 L1 数据）。
-  - **模糊检索优先**：仅返回向量空间内数学映射的结果。严禁幻觉连接。
+### L2：结构化潜意识 (Subconscious Structure) - 三重记忆网络
+RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件，以防止“同一叙事被多维度重复计价”的贝叶斯谬误：
+1. **L2.1 Semantic Memory (语义记忆网络)**：
+   - **物理路径**：`/home/liwu/digital_twin/Semantic_Memory/`
+   - **职责**：仅负责新闻、文本、研报的向量化召回与模糊联想。
+2. **L2.2 Feature Store (时序特征库)**：
+   - **物理路径**：`/home/liwu/digital_twin/Feature_Store/`
+   - **职责**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
+3. **L2.3 Evidence Graph (证据图谱)**：
+   - **物理路径**：`/home/liwu/digital_twin/Evidence_Graph/`
+   - **职责**：消除多重共线性（Multi-collinearity）。把“同一件事”在新闻、Polymarket、价格中的多个投影连起来，防止在后验推断中被多次重复加分。
 
 ### L2.5：信念层 (Belief Store) - 演绎与校准
 - **物理路径**：`/home/liwu/digital_twin/Beliefs/` (包含生成的研报与状态快照)
