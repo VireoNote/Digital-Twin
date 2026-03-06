@@ -38,11 +38,17 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 *   🌩️ **Crypto Extreme Weather Agent (`crypto-extreme-weather`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
 *   🪙 **Crypto Micro Climate Agent (`crypto-micro`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
 
-### Step 5: Multi-Timeframe Discriminative Models & Layered Execution
-The L3 Forecasting Center completely abandons the "Bayesian Likelihood Patchwork" and adopts a **Multi-Timeframe Discriminative Architecture**. It splits the prediction into three independent supervised learning tasks, each passing through strict **out-of-sample probability calibration** (Platt/Isotonic):
-1. **30d Strategic Tailwind ($P_{30d\_Tailwind}$)**: Predicts if the next 30 days offer a positive risk-adjusted environment. **Execution**: Dictates the baseline direction for spot holdings and maximum risk budget.
-2. **7d Narrative Continuation ($P_{7d\_Continuation}$)**: Predicts if current mid-term trends will persist. **Execution**: Dictates whether to add rolling hedges or reduce net-long exposure.
-3. **24h Adverse Risk ($P_{24h\_Adverse\_Risk}$)**: A **Risk Gate**. Predicts the probability of severe adverse excursions or deleveraging events within 24 hours. **Execution**: High risk triggers leverage shutdown and protective puts; low risk clears the path for execution.
+### Step 5: View Layer & Action Layer Execution
+The L3 Forecasting Center explicitly separates its output into a **View Layer** (environmental conclusions) and an **Action Layer** (strict mappings to trading commands), utilizing the calibrated probabilities:
+
+**The View Layer (观点层):**
+1. **Regime Synthesis**: Determines the current "Weather Tag" (e.g., `Loose Liquidity but Fragile`).
+2. **Scenario Planning**: Outlines the Base Case and Tail Risks.
+
+**The Action Layer (动作层) - Strict Probability Mappings:**
+1. **30d Strategic Tailwind ($P_{30d\_Tailwind}$) ➡️ Spot Base Exposure**: Dictates the core baseline direction and maximum risk budget (e.g., Maintain 60% spot long).
+2. **7d Narrative Continuation ($P_{7d\_Continuation}$) ➡️ Mid-term Hedging**: Dictates the offensive/defensive tilt (e.g., Reduce net-long exposure, add rolling hedges).
+3. **24h Adverse Risk ($P_{24h\_Adverse\_Risk}$) ➡️ Risk Gate & Circuit Breaker**: The highest priority defense. If short-term risk is high, the system commands to cut all leverage and pause execution. If risk is low, the gate clears the path for trading.
 
 **Engineering Pillars:**
 *   **Regime Gate**: Models are *Regime-aware*. A separate module (e.g., HMM) acts purely as a "Weather Forecaster" (e.g., `Loose Liquidity`, `Panic`), routing samples or altering conditional mappings rather than issuing direct trade signals.
@@ -105,14 +111,21 @@ To deploy this system locally, the scripts require the following APIs:
 *   🌩️ **加密雷暴预警专员 (`crypto-extreme-weather`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
 *   🪙 **局部微气候加密专员 (`crypto-micro`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
 
-### 步骤 5：多时域判别式后验与分层执行
-L3 预报中心彻底放弃“拼凑似然”的古典贝叶斯后验推导，转向**“多时域判别式模型 + Regime Gate”**的工业级量化架构。系统将预测拆分为三个独立但可协同的监督学习任务，并在严格的**时间序列样本外进行概率校准**（Platt/Isotonic）：
-1. **30d 战略顺风 ($P_{30d\_Tailwind}$)**：预测未来 30 天是否提供正的战略顺风环境。**执行权限**：决定核心**现货的基准方向**和最大风险预算（管底仓）。
-2. **7d 中期延续 ($P_{7d\_Continuation}$)**：预测当前中期叙事是否延续。**执行权限**：决定是否增加滚动对冲、降低净多暴露（管倾斜）。
-3. **24h 短线不利风险 ($P_{24h\_Adverse\_Risk}$)**：这是一个**风险闸门**，预测未来 24h 内是否出现超预期的踩踏或去杠杆。**执行权限**：高风险时关闭杠杆、暂停开仓；低风险时放行（管刹车）。
+### 步骤 5：观点层与动作层的多时域分层执行
+L3 预报中心彻底放弃“拼凑似然”的古典贝叶斯后验推导，转向**“多时域判别式模型 + 观点/动作分离”**的架构。将输出严格划分为**观点层 (View Layer)** 与 **动作层 (Action Layer)**：
+
+**观点层 (View Layer) - 环境定调与情景推演：**
+1. **Regime 状态定调**：评估当前宏观与微观交织下的绝对“天气标签”（如：宽裕但极度脆弱）。
+2. **情景沙盘推演**：概述基准情景 (Base Case) 与尾部风险 (Tail Risk)。
+
+**动作层 (Action Layer) - 物理映射：**
+将三个独立时域的判别式概率（需经过严格的样本外校准），物理映射为不可违背的交易指令：
+1. **30d 战略底仓映射 ($P_{30d\_Tailwind}$ ➡️ 现货底仓)**：决定核心现货的基准暴露方向与最大风险预算。
+2. **7d 中期倾斜映射 ($P_{7d\_Continuation}$ ➡️ 滚动对冲)**：决定波段仓位的攻防倾斜（如：降低净多头暴露，或增加期权保护）。
+3. **24h 风险闸门映射 ($P_{24h\_Adverse\_Risk}$ ➡️ 刹车与熔断)**：最高优先级防守。这是风险闸门，高风险时切断杠杆、暂停开仓；低风险时放行。
 
 **三大工程支柱：**
-*   **Regime Gate (环境门卫)**：HMM 等状态机退居幕后，只提供“天气标签”（如 `大放水`, `恐慌去杠杆`），让主模型成为 *Regime-aware*，在不同天气下采用不同的条件概率映射，而不直接发号施令。
+*   **Regime Gate (环境门卫)**：HMM 等状态机退居幕后，只提供“天气标签”，让主模型成为 *Regime-aware*，在不同天气下采用不同的条件概率映射，而不直接发号施令。
 *   **经验贝叶斯收缩 (Empirical Bayes Shrinkage)**：贝叶斯从“全局推导口号”退回到“局部稀疏统计工具”。使用 Beta-Binomial 收缩防止系统在遭遇历史罕见切片（Rare Bucket）时过度自信。
 *   **特征层共线性管制 (Collinearity Control)**：废除在后验层硬相乘的逻辑。通过 `overlap_group` 打标，在特征进入模型前执行分组聚合或限额，显著降低冗余证据对同一叙事的重复放大。
 
