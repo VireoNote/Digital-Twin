@@ -9,7 +9,10 @@ This system completely abandons the traditional "multi-factor equal-weight stew"
 The system follows a strict physical hierarchy to ensure the underlying logic remains immutable, while upper-level beliefs can continuously evolve with data:
 
 *   **[Tier 1] The Sea of Perception (Inbox)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
-*   **[Tier 2] The Subconscious Network (ClawRAG)** - Association and Flow. Responsible for vectorized, intuitive retrieval of Tier 1 data.
+*   **[Tier 2] The Subconscious Structure** - Association, Alignment, and De-biasing. A monolithic RAG is fundamentally flawed for time-series and causality. Tier 2 is split into:
+    *   **Tier 2.1 Semantic Memory**: Vector DB for text, news, and narrative retrieval.
+    *   **Tier 2.2 Feature Store**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
+    *   **Tier 2.3 Evidence Graph**: Links different projections of the "same underlying event" (e.g., Fed cuts seen in News + Polymarket + Yields) into a single causal node, preventing catastrophic multi-counting in Bayesian inference.
 *   **[Tier 2.5] The Belief Store** - Deduction and Calibration. **[Where Evolution Happens]**. Stores the system's directional conclusions and derived market states (e.g., "Macro is bullish", "Extreme panic"). **Boundary:** Beliefs are probabilistic objects. They must be continuously calibrated, overwritten, or rolled back as new Evidence arrives via Bayesian updates.
 *   **[Tier 3] The Cognitive Anchor (Ontology Map)** - Essence and Law. This is the "Soul" of the digital twin. **Boundary:** Absolute Ground Truth. Tier 3 MUST ONLY store objective "Definitions", "Mathematical Methodologies" (e.g., Z-Score formulas), and "System Constraints". **It is strictly prohibited to hardcode any directional or emotional subjective conclusions (Beliefs) into Tier 3.** Tier 3 is the ruler; it does not record the length of what it measures.
 
@@ -70,7 +73,10 @@ To deploy this system locally, the scripts require the following APIs:
 系统遵循严密的物理层级隔离，确保底层逻辑不可篡改，而上层信念可以随数据持续演化：
 
 *   **L1：感知之海 (Inbox)** - 混沌与包容。接纳所有未经雕琢的原始信息碎片。**物理边界**：仅限追加 (Append-only)，保留真实。
-*   **L2：潜意识网络 (ClawRAG)** - 联想与流转。负责对 L1 的数据进行向量化直觉检索。
+*   **L2：结构化潜意识 (Subconscious Structure)** - 联想、对齐与消偏。废除单一 RAG 的黑盒（RAG 无法处理时序与因果），将其拆分为三层物理组件：
+    *   **L2.1 语义记忆 (Semantic Memory)**：向量库，仅负责新闻、文本、研报的向量化召回与模糊联想。
+    *   **L2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
+    *   **L2.3 证据图谱 (Evidence Graph)**：消除多重共线性（Multi-collinearity）。把“同一件事”在新闻、Polymarket、价格中的多个投影连起来，防止在后验推断中被多次重复加分。
 *   **L2.5：信念层 (Belief Store)** - 演绎与校准。**[系统演化的发生地]**。存放系统推演出的方向性结论（如“当前宏观偏多”、“情绪极度恐慌”）。**物理边界**：信念是概率对象，随着最新证据 (Evidence) 的涌入，必须通过贝叶斯公式不断被校准、覆写、回滚。
 *   **L3：认知定海神针 (Ontology Map)** - 本质与法则。这是数字孪生的“元神”。**物理边界**：绝对真理 (Ground Truth)。L3 只能存储“客观定义”、“数学口径（如 Z-Score 的计算公式）”和“系统约束红线”。**严禁将任何方向性、情绪性的主观结论（Belief）固化在 L3 中。** L3 是一把绝对的尺子，不负责记录当前测量的结果，更不可被随意篡改。
 
