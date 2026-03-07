@@ -20,11 +20,13 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
    - **物理路径**：`/home/liwu/digital_twin/Evidence_Graph/`
    - **职责**：消除多重共线性（Multi-collinearity）。把“同一件事”在新闻、Polymarket、价格中的多个投影连起来，防止在后验推断中被多次重复加分。
 
-### L2.5：状态寄存器 (State Register) - 演绎与校准
-- **物理路径**：`/home/liwu/digital_twin/State_Register/` (包含生成的研报与状态快照)
+### L2.5：概率状态机 (Probabilistic State Machine, 原信念层)
+- **物理路径**：`/home/liwu/digital_twin/State_Register/` (包含生成的快照与 Schema)
 - **执行边界**：
-  - **高密度变量**：彻底摒弃“市场恐慌”、“宏观偏多”等低密度自然语言。仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Panic`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。
-  - **可篡改与演化**：这些状态是可版本化、可回滚的概率对象。必须随着样本外校准和判别式模型的输出不断被覆写。这是系统真正发 生“学习与自我演化”的发生地。
+  - **废止模糊叙事**：彻底摒弃“市场恐慌”、“宏观偏多”等低密度自然语言。
+  - **强类型状态 (Typed State)**：核心状态（Regime, P_30d, P_7d, P_24h）必须符合 `State_Register/schemas/typed_state.json` 的格式，携带 `decay_half_life` 与 `confidence`，声明其生命周期。
+  - **有限状态机转移 (Transition Rules)**：状态的演化必须通过 `Ontology/state_transition_rules.md` 中的“写入前自检”。例如：Regime 切换强制导致旧的 30d 概率置信度归零；跨频率（如30d与7d）的概率冲突必须带有明确的底层证据解释，否则不予写入。
+  - 这是系统真正发生“学习与自我演化”的发生地。
 
 ### L2.7：策略内核 (Policy Kernel) - 混合控制架构
 - **物理路径**：`/home/liwu/digital_twin/Policy_Kernel/`
