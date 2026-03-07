@@ -43,12 +43,12 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
   - **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须按照 `CONFIRMED_OPEN`、`PENDING_CANCEL` 等状态进行概率折算。
   - **意图感知撤单 (Intent-Aware Cancel)**：拒绝无脑 `Cancel All`。仅撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
 
-### L3：认知定海神针 (Ontology Map) - 本质与法则
-- **物理路径**：`/home/liwu/digital_twin/Ontology/`
+### L3：规范与约束注册表 (Specification & Constraint Registry)
+- **物理路径**：`/home/liwu/digital_twin/Ontology/` (包含 `tier3_spec.yaml` 等)
 - **执行边界**：
-  - **绝对真理 (Ground Truth)**：仅包含客观定义、实体关系、数学计算口径（如 Z-Score、贝叶斯公式）以及策略约束红线。
-  - **禁止存储结论**：严禁在此层存储任何带有市场方向性或情绪定性的“结论”（这些属于 L2.5）。L3 只是一把尺子，不负责测量结果。
-  - **禁止修改**：除非收到显式的 `UPDATE_ONTOLOGY` 指令更改系统物理法则，否则严禁随意修改。
+  - **静态规则引擎 (Static Rule Engine)**：系统内最高约束层，对所有动态运行的 Agent 绝对只读。
+  - **允许存储的内容 (Whitelist)**：结构化声明（合法状态变量及其 Schema）、数学方法论（标准化算子逻辑）、硬性系统约束（最大杠杆率、逻辑互斥条件）。
+  - **严禁存储的内容 (Blacklist)**：任何形式的方向性观点（看涨/看跌）、市场状态解释（当前的 Regime 标签）、随行情动态调整的经验参数。
 
 ## 2. 系统执行协议 (System Constraints)
 - **协议：确认后执行 (Confirm-Before-Act)**：多阶段逻辑或模糊请求必须立即暂停并提齐。

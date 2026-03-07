@@ -1,0 +1,32 @@
+version: "3.8"
+tier: "3"
+name: "Specification & Constraint Registry"
+
+state_definitions:
+  P_24h_Adverse_Risk:
+    type: float
+    range: [0.0, 1.0]
+    description: "Probability of severe short-term negative price action."
+    required_metadata: [as_of, decay_half_life, confidence]
+  Regime:
+    type: enum
+    allowed_values: [Tightening_Fragile, Loose_Expansion, Panic_Liquidation]
+
+formula_registry:
+  StablecoinVelocity:
+    calculation: "Daily_DEX_Volume / Total_Stablecoin_Market_Cap"
+    dependencies: [DefiLlama_DEX_Volume, DefiLlama_Stablecoin_MCap]
+  FundingZScore:
+    calculation: "(Current_Funding_Rate - Rolling_14d_Mean) / Rolling_14d_StdDev"
+
+constraint_registry:
+  risk_limits:
+    max_gross_leverage: 1.0
+    emergency_kill_switch_condition: "P_24h_Adverse_Risk > 0.85"
+  state_transitions:
+    regime_shift_invalidation: "IF Regime changes THEN set P_30d_Tailwind.confidence = 0.0"
+
+prohibited_content:
+  - "Directional market beliefs (e.g., 'Bullish', 'Bearish')"
+  - "Current market interpretations or narratives"
+  - "Dynamic empirical thresholds derived from recent performance"
