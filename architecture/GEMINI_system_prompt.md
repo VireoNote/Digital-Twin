@@ -24,7 +24,15 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
 - **物理路径**：`/home/liwu/digital_twin/State_Register/` (包含生成的研报与状态快照)
 - **执行边界**：
   - **高密度变量**：彻底摒弃“市场恐慌”、“宏观偏多”等低密度自然语言。仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Panic`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。
-  - **可篡改与演化**：这些状态是可版本化、可回滚的概率对象。必须随着样本外校准和判别式模型的输出不断被覆写。这是系统真正发生“学习与自我演化”的发生地。
+  - **可篡改与演化**：这些状态是可版本化、可回滚的概率对象。必须随着样本外校准和判别式模型的输出不断被覆写。这是系统真正发 生“学习与自我演化”的发生地。
+
+### L2.7：策略内核 (Policy Kernel) - 混合控制架构
+- **物理路径**：`/home/liwu/digital_twin/Policy_Kernel/`
+- **执行边界**：
+  - 严禁将 L2.5 的状态概率直接连接到执行层（下单API）。
+  - **Stage A (离散的权力边界)**：基于宪法层 `policy_constraints.md` 执行硬规则过滤（状态过期截断、24h 高风险降杠杆、Regime 切换迟滞）。
+  - **Stage B (连续的数值解算)**：在 Stage A 放行后，综合 30d/7d/24h 概率与调仓摩擦成本，计算连续的 `target_spot_beta` 与 `target_futures_hedge_ratio`。
+  - **最终输出**：将抽象的策略目标发送给 Execution Adapter。
 
 ### L3：认知定海神针 (Ontology Map) - 本质与法则
 - **物理路径**：`/home/liwu/digital_twin/Ontology/`
