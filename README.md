@@ -1,6 +1,8 @@
 # Trading Agent Architecture 3.8
 
-This repository hosts the source code and architectural philosophy of **Weather Station 3.8**, a highly autonomous, self-evolving automated agent and quantitative trading decision architecture built on the Gemini CLI.
+This repository hosts the source code and architectural philosophy of **Weather Station 3.8**, a highly autonomous, Bayesian-calibrating quantitative trading decision architecture built on the Gemini CLI.
+
+**Core Safety Principle:** The system is explicitly forbidden from "self-evolving" its execution rules, risk hard-boundaries, structural topology, or maximum leverage caps. Automated adaptation is strictly limited to parameter re-estimation, Bayesian posterior calibration, confidence decay, and feature validity monitoring.
 
 This system completely abandons the traditional "multi-factor equal-weight stew" logic. Instead, it adopts a core philosophy centered on **"Frequency Isolation", "Bayesian Inference", and "Multi-Dimensional Dimensionality Reduction Strikes."**
 
@@ -13,7 +15,7 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Tier 2.1 Text Embeddings**: Vector DB for text, news, and narrative retrieval.
     *   **Tier 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
     *   **Tier 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
-*   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Evolution Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
+*   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
 *   **[Tier 2.7] The Policy Kernel (Hybrid Control Architecture)** - **[New in v3.6]**. Converts continuous cognitive probabilities into discrete target exposures. It operates a hybrid model:
 *   **[Tier 2.8] The Execution Kernel (Idempotent Rebalance Cycle)** - **[New in v3.7]**. Replaces direct action commands (Buy/Sell) with a state-reconciliation engine.
     *   **Intent-Driven**: Operates strictly on `Target Exposure - Effective Position`.
