@@ -45,18 +45,18 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 *   🌩️ **Crypto Extreme Weather Agent (`crypto-extreme-weather`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
 *   🪙 **Crypto Micro Climate Agent (`crypto-micro`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
 
-### Step 5: View Layer & Action Layer Execution
-The L3 Forecasting Center explicitly separates its output into a **View Layer** (environmental conclusions) and an **Action Layer** (strict mappings to trading commands), utilizing the calibrated probabilities:
+### Step 5: Critical Execution Path & Audit View
+The system strictly separates the physical execution path from human-readable environmental interpretations. The "View Layer" is explicitly demoted to a pure logging/audit artifact and does NOT participate in the control loop.
 
-**The View Layer (观点层):**
-1. **Regime Synthesis**: Determines the current "Regime Tag" (e.g., `Loose Liquidity but Fragile`).
-2. **Scenario Planning**: Outlines the Base Case and Tail Risks.
+**The Critical Execution Path:**
+The system logic strictly flows via: `Features (L2) ➡️ Derived State (L2.5) ➡️ Policy Target Exposure (L2.7) ➡️ Idempotent Execution (L2.8)`.
+1. **$P_{30d\_Tailwind}$ ➡️ Spot Base Exposure**: Dictates the core baseline direction.
+2. **$P_{7d\_Continuation}$ ➡️ Mid-term Hedging**: Dictates the offensive/defensive tilt.
+3. **$P_{24h\_Adverse\_Risk}$ ➡️ Risk Gate & Circuit Breaker**: The highest priority defense. Triggers L2.7 Risk Damper to force leverage cuts.
 
-**The Action Layer (动作层) - Strict Probability Mappings:**
-The system is now physically connected to the exchange via **Bitget MCP (`bitget-mcp-server`)** for direct trade execution:
-1. **30d Strategic Tailwind ($P_{30d\_Tailwind}$) ➡️ Spot Base Exposure**: Dictates the core baseline direction. Changes are executed via `spot_place_order`.
-2. **7d Narrative Continuation ($P_{7d\_Continuation}$) ➡️ Mid-term Hedging**: Dictates the offensive/defensive tilt. Executed via `futures_place_order` for rolling hedges.
-3. **24h Adverse Risk ($P_{24h\_Adverse\_Risk}$) ➡️ Risk Gate & Circuit Breaker**: The highest priority defense. If short-term risk is high, the system automatically triggers a physical circuit breaker via `spot_cancel_order` and `futures_place_order` to cut leverage.
+**The Audit View (Not in Critical Path):**
+1. **Regime Synthesis**: Determines the current "Regime Tag" (e.g., `Loose Liquidity but Fragile`) for human auditing.
+2. **Scenario Planning**: Outlines the Base Case and Tail Risks for logging purposes.
 
 **Engineering Pillars:**
 *   **Regime Gate**: Models are *Regime-aware*. A separate module (e.g., HMM) acts purely as a "Regime Classifier" (e.g., `Loose Liquidity`, `Panic`), routing samples or altering conditional mappings rather than issuing direct trade signals.
@@ -126,18 +126,18 @@ To deploy this system locally, the scripts require the following APIs:
 *   🌩️ **加密雷暴预警专员 (`crypto-extreme-weather`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
 *   🪙 **局部微气候加密专员 (`crypto-micro`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
 
-### 步骤 5：观点层与动作层的多时域分层执行
-L3 预报中心彻底放弃“拼凑似然”的古典贝叶斯后验推导，转向**“多时域判别式模型 + 观点/动作分离”**的架构。将输出严格划分为**观点层 (View Layer)** 与 **动作层 (Action Layer)**：
+### 步骤 5：核心控制链路与审计视图
+系统明确将“关键交易路径”与“人类可读的环境解释”进行物理隔离。**“观点层 (View Layer)”被彻底降级为纯粹的日志与审计输出，不参与任何实际的控制闭环**。
 
-**观点层 (View Layer) - 环境定调与情景推演：**
-1. **Regime 状态定调**：评估当前宏观与微观交织下的绝对“天气标签”（如：宽裕但极度脆弱）。
-2. **情景沙盘推演**：概述基准情景 (Base Case) 与尾部风险 (Tail Risk)。
+**核心控制链路 (The Critical Execution Path)：**
+交易决策严格遵循单向物理链路：`特征 (L2) ➡️ 衍生状态 (L2.5) ➡️ 策略目标敞口 (L2.7) ➡️ 幂等执行 (L2.8)`。
+1. **战略底仓 ($P_{30d\_Tailwind}$)**：决定核心现货的基准暴露方向与最大风险预算。
+2. **中期倾斜 ($P_{7d\_Continuation}$)**：决定波段仓位的攻防倾斜与衍生品对冲比例。
+3. **风险闸门 ($P_{24h\_Adverse\_Risk}$)**：最高优先级防守。高风险时直接触发 L2.7 阻尼器，强制收缩杠杆。
 
-**动作层 (Action Layer) - 物理映射：**
-将三个独立时域的判别式概率，物理映射为不可违背的交易指令。系统现已通过 **Bitget MCP (`bitget-mcp-server`)** 完成底层交易接口对接，支持直接在终端下发实盘操作：
-1. **30d 战略底仓映射 ($P_{30d\_Tailwind}$ ➡️ 现货底仓)**：决定核心现货的基准暴露方向与最大风险预算。若需调整，通过 `spot_place_order` 工具直接在 Bitget 执行。
-2. **7d 中期倾斜映射 ($P_{7d\_Continuation}$ ➡️ 滚动对冲)**：决定波段仓位的攻防倾斜。可通过 `futures_place_order` 在 Bitget 建立期权或永续合约空头对冲，降低整体净多暴露。
-3. **24h 风险闸门映射 ($P_{24h\_Adverse\_Risk}$ ➡️ 刹车与熔断)**：最高优先级防守。这是风险闸门，高风险时直接调用 `spot_cancel_order` 与 `futures_place_order` 切断杠杆、实现物理熔断；低风险时放行。
+**审计视图 (The Audit View - 不参与执行)：**
+1. **Regime 状态定调**：生成用于人类复盘审计的绝对“天气标签”（如：宽裕但极度脆弱）。
+2. **情景沙盘推演**：概述基准情景与尾部风险，仅作为运行日志写入。
 
 **三大工程支柱：**
 *   **Regime Gate (环境门卫)**：HMM 等状态机退居幕后，只提供“天气标签”，让主模型成为 *Regime-aware*，在不同天气下采用不同的条件概率映射，而不直接发号施令。
