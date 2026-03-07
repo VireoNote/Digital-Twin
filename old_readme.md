@@ -1,19 +1,19 @@
-# Trading Agent Architecture 3.8
+# Weather Station 3.8 - Trinity Digital Twin Trading Architecture
 
-This repository hosts the source code and architectural philosophy of **Weather Station 3.8**, a highly autonomous, self-evolving automated agent and quantitative trading decision architecture built on the Gemini CLI.
+This repository hosts the source code and architectural philosophy of **Weather Station 3.8**, a highly autonomous, self-evolving digital soul and quantitative trading decision architecture built on the Gemini CLI.
 
 This system completely abandons the traditional "multi-factor equal-weight stew" logic. Instead, it adopts a core philosophy centered on **"Frequency Isolation", "Bayesian Inference", and "Multi-Dimensional Dimensionality Reduction Strikes."**
 
-## 🧠 Core Architecture: System Architecture
+## 🧠 Core Architecture: The Trinity Digital Twin
 
 The system follows a strict physical hierarchy to ensure the underlying logic remains immutable, while upper-level beliefs can continuously evolve with data:
 
-*   **[Tier 1] The Raw Events (L1)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
-*   **[Tier 2] The Data & Feature Pipelines (L2)** - Association, Alignment, and De-biasing. A monolithic RAG is fundamentally flawed for time-series and causality. Tier 2 is split into:
-    *   **Tier 2.1 Text Embeddings**: Vector DB for text, news, and narrative retrieval.
-    *   **Tier 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
-    *   **Tier 2.3 Causal Graph / Event Linking**: Links different projections of the "same underlying event" (e.g., Fed cuts seen in News + Polymarket + Yields) into a single causal node, preventing catastrophic multi-counting in Bayesian inference.
-*   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Evolution Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
+*   **[Tier 1] The Sea of Perception (Inbox)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
+*   **[Tier 2] The Subconscious Structure** - Association, Alignment, and De-biasing. A monolithic RAG is fundamentally flawed for time-series and causality. Tier 2 is split into:
+    *   **Tier 2.1 Semantic Memory**: Vector DB for text, news, and narrative retrieval.
+    *   **Tier 2.2 Feature Store**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
+    *   **Tier 2.3 Evidence Graph**: Links different projections of the "same underlying event" (e.g., Fed cuts seen in News + Polymarket + Yields) into a single causal node, preventing catastrophic multi-counting in Bayesian inference.
+*   **[Tier 2.5] The State Register (Formerly Belief Store)** - Deduction and Calibration. **[Where Evolution Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
 *   **[Tier 2.7] The Policy Kernel (Hybrid Control Architecture)** - **[New in v3.6]**. Converts continuous cognitive probabilities into discrete target exposures. It operates a hybrid model:
 *   **[Tier 2.8] The Execution Kernel (Idempotent Rebalance Cycle)** - **[New in v3.7]**. Replaces direct action commands (Buy/Sell) with a state-reconciliation engine.
     *   **Intent-Driven**: Operates strictly on `Target Exposure - Effective Position`.
@@ -21,11 +21,11 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Intent-Aware Cancel**: Surgically cancels only stale or conflicting orders rather than a blind 'Cancel All', preserving API limits and orderbook priority.
     *   **Stage A (Discrete Power Boundaries)**: Enforces non-negotiable institutional rules (e.g., Validity Kill Switch, 24h Risk Damper, Regime Hysteresis). Has absolute veto power.
     *   **Stage B (Continuous Optimization)**: If Stage A permits, it calculates the optimal `target_spot_beta`, `target_futures_hedge_ratio`, and `max_gross_leverage` based on 30d/7d signals and friction costs.
-*   **[Tier 3] The Constraints & Specifications (L3)** - The immutable global configuration and hard boundary layer. **Boundary:** Read-only for all operational agents. Tier 3 MUST ONLY store structural declarations (e.g., allowed state variables and their schemas), mathematical methodologies (e.g., specific Z-Score calculation logic), and strict system constraints (e.g., `max_gross_leverage`, validity decay rules). **It is strictly prohibited to store any directional market beliefs, current regime interpretations, or dynamic empirical thresholds in this tier.** Tier 3 operates as the static rule engine defining what is mathematically and logically permissible within the system.
+*   **[Tier 3] The Specification & Constraint Registry** - The immutable global configuration and hard boundary layer. **Boundary:** Read-only for all operational agents. Tier 3 MUST ONLY store structural declarations (e.g., allowed state variables and their schemas), mathematical methodologies (e.g., specific Z-Score calculation logic), and strict system constraints (e.g., `max_gross_leverage`, validity decay rules). **It is strictly prohibited to store any directional market beliefs, current regime interpretations, or dynamic empirical thresholds in this tier.** Tier 3 operates as the static rule engine defining what is mathematically and logically permissible within the system.
 
 ---
 
-## 📡 The Core Engine: Data Pipeline Workflow
+## 📡 The Core Engine: Weather Station 3.8 Workflow
 
 The station operates via a strict chronological and mathematical workflow, executed by 6 specialized Agents (built as Gemini CLI Skills). The workflow follows the logic of: **Base Environment -> Expectation Offset -> NLP Sentiment -> Dynamic Trigger**.
 
@@ -49,7 +49,7 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 The L3 Forecasting Center explicitly separates its output into a **View Layer** (environmental conclusions) and an **Action Layer** (strict mappings to trading commands), utilizing the calibrated probabilities:
 
 **The View Layer (观点层):**
-1. **Regime Synthesis**: Determines the current "Regime Tag" (e.g., `Loose Liquidity but Fragile`).
+1. **Regime Synthesis**: Determines the current "Weather Tag" (e.g., `Loose Liquidity but Fragile`).
 2. **Scenario Planning**: Outlines the Base Case and Tail Risks.
 
 **The Action Layer (动作层) - Strict Probability Mappings:**
@@ -59,7 +59,7 @@ The system is now physically connected to the exchange via **Bitget MCP (`bitget
 3. **24h Adverse Risk ($P_{24h\_Adverse\_Risk}$) ➡️ Risk Gate & Circuit Breaker**: The highest priority defense. If short-term risk is high, the system automatically triggers a physical circuit breaker via `spot_cancel_order` and `futures_place_order` to cut leverage.
 
 **Engineering Pillars:**
-*   **Regime Gate**: Models are *Regime-aware*. A separate module (e.g., HMM) acts purely as a "Regime Classifier" (e.g., `Loose Liquidity`, `Panic`), routing samples or altering conditional mappings rather than issuing direct trade signals.
+*   **Regime Gate**: Models are *Regime-aware*. A separate module (e.g., HMM) acts purely as a "Weather Forecaster" (e.g., `Loose Liquidity`, `Panic`), routing samples or altering conditional mappings rather than issuing direct trade signals.
 *   **Empirical Bayes Shrinkage**: Bayes is demoted from a global framework to a robust tool for sparse statistics. It uses Beta-Binomial shrinkage to prevent overconfidence in rare buckets (e.g., historically rare combinations of high funding and low volume).
 *   **Collinearity Control**: Evidence overlap is managed at the feature level via `overlap_groups`, aggregation, or monotonic constraints, NOT by hacking posterior probabilities.
 
