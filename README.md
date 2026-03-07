@@ -34,19 +34,19 @@ The station operates via a strict chronological and mathematical workflow, execu
 
 ### Step 1: Extract the Macro Base (Low-Pass Filter / Slow Variables)
 Calculates the fundamental win-rate anchor ($E_{macro}$) using Exponential Moving Averages (EMA) to filter out daily noise.
-*   🌊 **Liquidity Plumbing Agent (`liquidity-plumbing`)**: Fetches FRED API for WALCL, TGA, and RRP to determine the depth of the Fed's underlying net liquidity pool.
-*   🌡️ **Policy Pressure Agent (`policy-pressure`)**: Fetches DXY, TIPS, and T10Y2Y to determine the momentum of macro liquidity drains/injections and recessionary yield curve inversions.
+*   🌊 **Macro Liquidity Extractor (`macro-liquidity`)**: Fetches FRED API for WALCL, TGA, and RRP to determine the depth of the Fed's underlying net liquidity pool.
+*   🌡️ **Macro Yields Extractor (`macro-yields`)**: Fetches DXY, TIPS, and T10Y2Y to determine the momentum of macro liquidity drains/injections and recessionary yield curve inversions.
 
 ### Step 2: Narrative Premium Offset (Expectation Variables)
-*   📡 **Doppler Radar Agent (`doppler-radar`)**: Monitors Polymarket (a real-money prediction market) to scan for sudden policy shifts and macro event narrative momentum.
+*   📡 **Prediction Market Monitor (`prediction-markets`)**: Monitors Polymarket (a real-money prediction market) to scan for sudden policy shifts and macro event narrative momentum.
 
 ### Step 3: NLP Sentiment Alpha (Feels-like Temperature) [New in v3.4]
-*   🌡️ **Feels-like Temperature Agent (`feels-like-temperature`)**: Fetches Web3 news streams via OpenNews MCP. It quantifies AI ratings and long/short signals into a continuous Alpha Factor `[-1, 1]`, acting as a final emotional reality-check against purely rational macro models.
+*   🌡️ **NLP Sentiment Analyzer (`nlp-sentiment`)**: Fetches Web3 news streams via OpenNews MCP. It quantifies AI ratings and long/short signals into a continuous Alpha Factor `[-1, 1]`, acting as a final emotional reality-check against purely rational macro models.
 
 ### Step 4: Dynamic Trigger Authorization (High-Pass Filter / Fast Variables)
 Monitors the market to find exhaustion or breakout points in sentiment. *Static thresholds have been completely deprecated in v3.0.*
-*   🌩️ **Crypto Extreme Weather Agent (`crypto-extreme-weather`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
-*   🪙 **Crypto Micro Climate Agent (`crypto-micro`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
+*   🌩️ **Derivatives OI Monitor (`derivatives-oi`)**: Abandons absolute USD value thresholds. It now builds a Probability Model (Long Build-up vs Short Covering) by tracking **Coin-margined OI increment ($\Delta$OI)**, Price Direction, and Funding Rates. It uses **Z-Scores** over rolling windows to detect statistically significant institutional accumulation or liquidations.
+*   🪙 **Stablecoin Velocity Monitor (`stablecoin-velocity`)**: Fetches DefiLlama data. It strictly rejects the illusion of total Stablecoin Market Cap, focusing instead on **Stablecoin Velocity (Daily DEX Volume / Market Cap)** to determine if the liquidity is actual purchasing power or just "dead water."
 
 ### Step 5: Critical Execution Path & Audit View
 The system strictly separates the physical execution path from human-readable environmental interpretations. The "View Layer" is explicitly demoted to a pure logging/audit artifact and does NOT participate in the control loop.
@@ -117,19 +117,19 @@ To deploy this system locally, the scripts require the following APIs:
 
 ### 步骤 1：提取宏观底色 (Low-Pass Filter / 慢变量)
 通过计算指数移动平均 (EMA) 过滤日常噪音，输出系统的基础胜率锚点 ($E_{macro}$)。
-*   🌊 **流动性降水专员 (`liquidity-plumbing`)**：抓取 FRED API 的 WALCL, TGA, RRP，判定美联储底层的净流动性“水池”深度。
-*   🌡️ **政策气压专员 (`policy-pressure`)**：抓取 DXY, TIPS, T10Y2Y，判定“真实/虚假强美元”以及衰退倒挂传导势能。
+*   🌊 **宏观流动性特征提取器 (`macro-liquidity`)**：抓取 FRED API 的 WALCL, TGA, RRP，判定美联储底层的净流动性“水池”深度。
+*   🌡️ **宏观收益率特征提取器 (`macro-yields`)**：抓取 DXY, TIPS, T10Y2Y，判定“真实/虚假强美元”以及衰退倒挂传导势能。
 
 ### 步骤 2：叙事溢价补偿 (Expectation Variables / 预期变量)
-*   📡 **多普勒雷达专员 (`doppler-radar`)**：利用 Polymarket `/events` 接口，监控交易量超百万美金的突发宏观事件，提取高能叙事溢价。
+*   📡 **预测市场共识提取器 (`prediction-markets`)**：利用 Polymarket `/events` 接口，监控交易量超百万美金的突发宏观事件，提取高能叙事溢价。
 
 ### 步骤 3：情绪偏移 (Sentiment Alpha / 体感变量) [v3.4 新增]
-*   🌡️ **体感温度专员 (`feels-like-temperature`)**：基于 OpenNews MCP 抓取全网资讯并量化 AI 评级与多空信号，转化为连续的 Alpha 因子 ([-1, 1])。作为对纯理性宏观模型的感性校验，防止忽略极端的 FOMO 或恐慌踩踏。
+*   🌡️ **NLP情绪因子提取器 (`nlp-sentiment`)**：基于 OpenNews MCP 抓取全网资讯并量化 AI 评级与多空信号，转化为连续的 Alpha 因子 ([-1, 1])。作为对纯理性宏观模型的感性校验，防止忽略极端的 FOMO 或恐慌踩踏。
 
 ### 步骤 4：微观扳机动态授权 (High-Pass Filter / 快变量)
 **[v3.0 重大升级]：彻底废除静态绝对值阈值。**
-*   🌩️ **加密雷暴预警专员 (`crypto-extreme-weather`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
-*   🪙 **局部微气候加密专员 (`crypto-micro`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
+*   🌩️ **衍生品多空监控器 (`derivatives-oi`)**：摒弃 U 本位假象。严格使用 **币本位 OI 增量 + 价格方向 + 资金费率** 构建多空行为概率模型（精准区分“多头建仓”与“空头回补”）。利用 1H/4H 的百分比及 14天 **Z-Score** 捕捉具备统计学意义的主力异动。
+*   🪙 **稳定币流速监控器 (`stablecoin-velocity`)**：摒弃稳定币总市值的刻舟求剑，专注于测算真实的 **日换手流速 (Velocity = DEX Volume / Market Cap)**。结合流速 Z-Score 判断目前场内资金是“死水沉淀”还是“健康活跃”。
 
 ### 步骤 5：核心控制链路与审计视图
 系统明确将“关键交易路径”与“人类可读的环境解释”进行物理隔离。**“观点层 (View Layer)”被彻底降级为纯粹的日志与审计输出，不参与任何实际的控制闭环**。

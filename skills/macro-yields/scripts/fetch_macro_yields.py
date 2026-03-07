@@ -50,7 +50,7 @@ def main():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_path = os.path.join(INBOX_DIR, f"policy_pressure_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
 
-    markdown_content = f"""# 政策气压专员 观测报告 (v1.1)
+    markdown_content = f"""# 宏观收益率特征提取器 观测报告 (v1.1)
 **生成时间**: {now}
 ## 核心指标
 - **当前 TIPS 收益率**: {tips_current}%

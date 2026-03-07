@@ -141,7 +141,7 @@ def main():
     
     alerts_str = "\n".join([f"- {a}" for a in alerts])
     
-    markdown_content = f"""# 加密雷暴预警专员 观测报告 (v2.0 动态增量与行为归因版)
+    markdown_content = f"""# 衍生品多空监控器 观测报告 (v2.0 动态增量与行为归因版)
 **生成时间**: {now}
 
 ## 核心指标

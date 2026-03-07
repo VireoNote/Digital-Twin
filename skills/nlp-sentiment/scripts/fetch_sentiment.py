@@ -98,7 +98,7 @@ def main():
     alpha, bull, bear, neut = calculate_alpha(news)
     report, now_str = generate_report(alpha, bull, bear, neut, news)
     
-    # Save to L1 Inbox
+    # Save to L1 原始事件层
     inbox_dir = "/home/liwu/digital_twin/Inbox/"
     os.makedirs(inbox_dir, exist_ok=True)
     filename = os.path.join(inbox_dir, f"sentiment_alpha_{now_str}.md")

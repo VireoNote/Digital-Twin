@@ -86,7 +86,7 @@ def main():
     notional_oi_b = notional_oi / 1000000000
     dynamic_oi_b = dynamic_oi_threshold / 1000000000
 
-    markdown_content = f"""# 加密雷暴预警专员 观测报告 (v1.1 贝叶斯升级版)
+    markdown_content = f"""# 衍生品多空监控器 观测报告 (v1.1 贝叶斯升级版)
 **生成时间**: {now}
 
 ## 宏观底色修正参数

@@ -53,7 +53,7 @@ def main():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_path = os.path.join(INBOX_DIR, f"liquidity_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
 
-    markdown_content = f"""# 流动性降水专员 观测报告 (v1.1)
+    markdown_content = f"""# 宏观流动性特征提取器 观测报告 (v1.1)
 **生成时间**: {now}
 ## 核心指标
 - **当前净流动性 (Net Liquidity)**: {current_net_liquidity:,.2f} 十亿美元

@@ -131,7 +131,7 @@ def main():
     file_name = f"crypto_micro_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
     file_path = os.path.join(INBOX_DIR, file_name)
 
-    markdown_content = f"""# 局部微气候加密专员 (Crypto Micro) 观测报告
+    markdown_content = f"""# 稳定币流速监控器 (Crypto Micro) 观测报告
 
 **生成时间**: {now}
 **数据源**: DefiLlama (Stablecoins & DEX Volume), Yahoo Finance (CME, ETFs)

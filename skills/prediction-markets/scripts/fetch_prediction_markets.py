@@ -100,9 +100,9 @@ def main():
     
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     target_dir = get_inbox_dir()
-    file_path = os.path.join(target_dir, f"doppler_radar_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
+    file_path = os.path.join(target_dir, f"prediction_markets_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
     
-    markdown_content = f"""# 多普勒雷达专员 观测报告 (v2.3 高频流动性版)
+    markdown_content = f"""# 预测市场共识提取器 观测报告 (v2.3 高频流动性版)
 **生成时间**: {now}
 **数据源**: Polymarket Gamma API (/markets?order=volume24hr)
 
