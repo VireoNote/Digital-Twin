@@ -1,6 +1,6 @@
-# Trading Agent Architecture 3.8
+# Trading Agent Architecture 3.9
 
-This repository hosts the source code and architectural philosophy of **Weather Station 3.8**, a highly autonomous, Bayesian-calibrating quantitative trading decision architecture built on the Gemini CLI.
+This repository hosts the source code and architectural philosophy of **Weather Station 3.9**, a highly autonomous, Bayesian-calibrating quantitative trading decision architecture built on the Gemini CLI.
 
 **Core Safety Principle:** The system is explicitly forbidden from "self-evolving" its execution rules, risk hard-boundaries, structural topology, or maximum leverage caps. Automated adaptation is strictly limited to parameter re-estimation, Bayesian posterior calibration, confidence decay, and feature validity monitoring.
 
@@ -85,7 +85,7 @@ To deploy this system locally, the scripts require the following APIs:
 ---
 ---
 
-# 气象观测站 3.8 (Weather Station 3.8) - 三位一体数字分身交易架构
+# 气象观测站 3.9 (Weather Station 3.9) - 三位一体数字分身交易架构
 
 这是基于 Gemini CLI 构建的一个**高度自治、具备自我演化能力的数字灵魂与量化交易决策架构**。本系统彻底抛弃了传统的“多因子平权一锅炖”逻辑，转而采用**“频率隔离”、“贝叶斯推断”与“多维降维打击”**的核心哲学。
 
@@ -111,7 +111,7 @@ To deploy this system locally, the scripts require the following APIs:
 
 ---
 
-## 📡 核心引擎：气象观测站 3.8 工作流
+## 📡 核心引擎：气象观测站 3.9 工作流
 
 该观测站由 6 位专职 Agent (基于 Gemini CLI Skills 构建) 组成，严格执行时间与数学上的递进逻辑：**底色 -> 偏移 -> 情绪 -> 扳机**。
 
