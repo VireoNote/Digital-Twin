@@ -32,7 +32,7 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
 - **物理路径**：`/home/liwu/digital_twin/Decision_Engine/`
 - **执行边界**：
   - **统揽策略与风控**：系统的“大脑皮层”。回答“在这个市场状态下，系统应该持有多少敞口？”
-  - **输入**：`Features` (特征) + `Derived State` (认知概率) + `Constraints` (L3 宪法红线)。
+  - **统一快照输入 (DecisionSnapshot)**：严禁分别或异步读取特征与状态。必须消费由汇聚网关生成的不可变 `DecisionSnapshot` (包含对齐时间戳的 features, state 与 constraint_version)，以彻底消除数据撕裂 (Clock Skew)。
   - **内部逻辑**：全权负责 Hard Veto (时效拦截)、Leverage Cap (风险阻尼器降杠杆)、Hysteresis (防抖迟滞) 和 Friction-Aware Optimization (摩擦成本精算)。
   - **唯一输出**：纯净的 `Target Exposure`（目标敞口字典）。严禁在此层输出具体的撤单或下单指令。
 

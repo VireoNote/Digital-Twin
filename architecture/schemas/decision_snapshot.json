@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Decision Snapshot (Unified Read Interface)",
+  "description": "An immutable point-in-time snapshot merging Features, State, and Constraints to guarantee deterministic execution without clock skew.",
+  "type": "object",
+  "required": [
+    "snapshot_id",
+    "clock_timestamp",
+    "constraint_version",
+    "feature_snapshot",
+    "state_snapshot"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "Unique UUID for this specific decision evaluation frame."
+    },
+    "clock_timestamp": {
+      "type": "integer",
+      "description": "The exact UTC millisecond timestamp when this snapshot was assembled."
+    },
+    "constraint_version": {
+      "type": "string",
+      "description": "Hash or version tag of the Tier 3 spec used for this snapshot."
+    },
+    "feature_snapshot": {
+      "type": "object",
+      "description": "Raw numerical features pulled from L2.2 at the time of assembly.",
+      "required": ["feature_as_of", "data"],
+      "properties": {
+        "feature_as_of": { "type": "integer" },
+        "data": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "state_snapshot": {
+      "type": "object",
+      "description": "Derived probabilistic states pulled from L2.5 at the time of assembly.",
+      "required": ["state_as_of", "states"],
+      "properties": {
+        "state_as_of": { "type": "integer" },
+        "states": {
+          "type": "object",
+          "description": "Dictionary of strongly typed state variables (Regime, P_30d, etc.)"
+        }
+      }
+    }
+  }
+}

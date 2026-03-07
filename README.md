@@ -16,7 +16,7 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Tier 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
     *   **Tier 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
 *   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
-*   **[Tier 2.7] The Decision Engine** - **[Upgraded in v3.9]**. The strategic "frontal lobe" of the system. It strictly translates cognitive state into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
+*   **[Tier 2.7] The Decision Engine** - **[Upgraded in v3.9]**. The strategic "frontal lobe" of the system. It strictly translates a unified `DecisionSnapshot` (atomically merging Features, State, and Constraints to prevent clock-skew) into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
     *   **Hard Vetoes**: Intercepts expired states or regime hysteresis.
     *   **Leverage Caps**: Dynamically clamps total gross exposure during high-risk regimes (`P_24h_Risk > 0.85`).
     *   **Friction-Aware Optimization**: Calculates the optimal `target_spot_beta` and `target_futures_hedge_ratio` within the allowed boundaries.
@@ -99,7 +99,7 @@ To deploy this system locally, the scripts require the following APIs:
     *   **L2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
     *   **L2.3 事件归并表 (Event Ledger)**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
 *   **L2.5：状态寄存器 (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
-*   **L2.7：决策引擎 (Decision Engine)** - **[v3.9 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控，回答“在这个市场状态下，系统应该持有多少敞口？”。
+*   **L2.7：决策引擎 (Decision Engine)** - **[v3.9 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控。**必须消费对齐时间戳的统一快照 (`DecisionSnapshot`)**，彻底消灭数据撕裂。回答“在这个快照状态下，系统应该持有多少敞口？”。
     *   **硬性拦截 (Hard Vetoes)**：处理状态过期或 Regime 切换期的迟滞。
     *   **杠杆阻尼 (Leverage Caps)**：在高风险 ($P_{24h\_Risk} > 0.85$) 期间强制压低总目标敞口上限。
     *   **摩擦精算 (Friction-Aware Optimization)**：在安全边界内，计算出包含 `target_spot_beta` 与 `target_futures_hedge_ratio` 的纯净“目标敞口”。严禁在此层直接生成物理下单动作。
