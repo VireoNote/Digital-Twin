@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "L2.8 Execution Kernel - Rebalance Cycle Schema",
+  "description": "Defines the idempotent data structure for translating Policy intents into atomic exchange actions.",
+  "type": "object",
+  "required": ["cycle_id", "intent_hash", "state_snapshot", "reconciliation_plan"],
+  "properties": {
+    "cycle_id": { "type": "string", "description": "Unique UUID for this execution loop." },
+    "intent_hash": { "type": "string", "description": "Hash of the Policy Kernel's Target Exposure. Used for idempotency." },
+    "state_snapshot": {
+      "type": "object",
+      "required": ["settled_positions", "open_orders"],
+      "properties": {
+        "settled_positions": { "type": "object", "description": "Actual physical balances and derivative positions retrieved from exchange." },
+        "open_orders": { "type": "array", "description": "All currently active in-flight orders." }
+      }
+    },
+    "effective_position_calculation": {
+      "type": "object",
+      "description": "Calculation of: EffectivePosition = settled_position + executable_inflight_effect",
+      "properties": {
+        "instrument": { "type": "string" },
+        "settled_base": { "type": "number" },
+        "executable_inflight_long": { "type": "number", "description": "Discounted sum of buy orders (e.g. submitted=0.5x, confirmed=1.0x)" },
+        "executable_inflight_short": { "type": "number" },
+        "net_effective_position": { "type": "number" }
+      }
+    },
+    "reconciliation_plan": {
+      "type": "object",
+      "required": ["cancel_stale_orders", "place_new_orders"],
+      "properties": {
+        "cancel_stale_orders": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of order IDs that are incompatible with the current intent (wrong side, wrong price bound, wrong version)."
+        },
+        "place_new_orders": {
+          "type": "array",
+          "description": "New orders strictly based on: Diff = Target - EffectivePosition (only if Diff > Minimum_Trade_Size)."
+        }
+      }
+    }
+  }
+}

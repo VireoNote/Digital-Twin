@@ -34,7 +34,14 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
   - 严禁将 L2.5 的状态概率直接连接到执行层（下单API）。
   - **Stage A (离散的权力边界)**：基于宪法层 `policy_constraints.md` 执行硬规则过滤（状态过期截断、24h 高风险降杠杆、Regime 切换迟滞）。
   - **Stage B (连续的数值解算)**：在 Stage A 放行后，综合 30d/7d/24h 概率与调仓摩擦成本，计算连续的 `target_spot_beta` 与 `target_futures_hedge_ratio`。
-  - **最终输出**：将抽象的策略目标发送给 Execution Adapter。
+  - **最终输出**：将抽象的策略目标以 `Target Intent` 形式发送给 Execution Kernel。
+
+### L2.8：执行内核 (Execution Kernel) - 幂等重平衡
+- **物理路径**：`/home/liwu/digital_twin/Execution_Kernel/`
+- **执行边界**：
+  - **目标驱动，非动作驱动**：彻底废除 `Buy/Sell` 的动作指令。每次循环生成包含 `intent_hash` 的快照。
+  - **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须按照 `CONFIRMED_OPEN`、`PENDING_CANCEL` 等状态进行概率折算。
+  - **意图感知撤单 (Intent-Aware Cancel)**：拒绝无脑 `Cancel All`。仅撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
 
 ### L3：认知定海神针 (Ontology Map) - 本质与法则
 - **物理路径**：`/home/liwu/digital_twin/Ontology/`
