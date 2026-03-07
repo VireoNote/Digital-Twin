@@ -1,6 +1,6 @@
-# Trading Agent Architecture 3.9.1
+# Trading Agent Architecture 3.9.2
 
-This repository hosts the source code and architectural philosophy of **Weather Station 3.9.1**, a highly autonomous, Bayesian-calibrating quantitative trading decision architecture built on the Gemini CLI.
+This repository hosts the source code and architectural philosophy of **Weather Station 3.9.2**, a highly autonomous, Bayesian-calibrating quantitative trading decision architecture built on the Gemini CLI.
 
 **Core Safety Principle:** The system is explicitly forbidden from "self-evolving" its execution rules, risk hard-boundaries, structural topology, or maximum leverage caps. Automated adaptation is strictly limited to parameter re-estimation, Bayesian posterior calibration, confidence decay, and feature validity monitoring.
 
@@ -16,11 +16,11 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Stage 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
     *   **Stage 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
 *   **[Stage 3] State (Probabilistic Machine)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
-*   **[Stage 4] Decision (Policy Engine)** - **[Upgraded in v3.9.1]**. The strategic "frontal lobe" of the system. It strictly translates a unified `DecisionSnapshot` (atomically merging Features, State, and Constraints to prevent clock-skew) into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
+*   **[Stage 4] Decision (Policy Engine)** - **[Upgraded in v3.9.2]**. The strategic "frontal lobe" of the system. It strictly translates a unified `DecisionSnapshot` (atomically merging Features, State, and Constraints to prevent clock-skew) into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
     *   **Hard Vetoes**: Intercepts expired states or regime hysteresis.
     *   **Leverage Caps**: Dynamically clamps total gross exposure during high-risk regimes (`P_24h_Risk > 0.85`).
     *   **Friction-Aware Optimization**: Calculates the optimal `target_spot_beta` and `target_futures_hedge_ratio` within the allowed boundaries.
-*   **[Stage 5] Execution (Idempotent Reconciler) (Idempotent Reconciler)** - **[Upgraded in v3.9.1]**. The stateless "spinal cord". It possesses no market views or risk logic. It purely calculates how to safely transition from the current physical state to the `Target Exposure`.
+*   **[Stage 5] Execution (Idempotent Reconciler) (Idempotent Reconciler)** - **[Upgraded in v3.9.2]**. The stateless "spinal cord". It possesses no market views or risk logic. It purely calculates how to safely transition from the current physical state to the `Target Exposure`.
     *   **State Reconciliation**: Strictly calculates `Delta = Target - EffectivePosition`.
     *   **In-flight Discounting**: Computes `EffectivePosition` by discounting pending orders based on their lifecycle state, preventing over-trading during network latency.
     *   **Intent-Aware Cancel**: Generates cancel intents surgically only for stale, opposing, or out-of-bounds orders, preserving API limits.
@@ -85,7 +85,7 @@ To deploy this system locally, the scripts require the following APIs:
 ---
 ---
 
-# 气象观测站 3.9.1 (Weather Station 3.9.1) - 三位一体数字分身交易架构
+# 气象观测站 3.9.2 (Weather Station 3.9.2) - 三位一体数字分身交易架构
 
 这是基于 Gemini CLI 构建的一个**高度自治、具备自我演化能力的数字灵魂与量化交易决策架构**。本系统彻底抛弃了传统的“多因子平权一锅炖”逻辑，转而采用**“频率隔离”、“贝叶斯推断”与“多维降维打击”**的核心哲学。
 
@@ -99,11 +99,11 @@ To deploy this system locally, the scripts require the following APIs:
     *   **Stage 2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
     *   **Stage 2.3 事件归并表 (Event Ledger)**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
 *   **Stage 3: State (认知推演) (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
-*   **Stage 4: Decision (决策求解) (Decision Engine)** - **[v3.9.1 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控。**必须消费对齐时间戳的统一快照 (`DecisionSnapshot`)**，彻底消灭数据撕裂。回答“在这个快照状态下，系统应该持有多少敞口？”。
+*   **Stage 4: Decision (决策求解) (Decision Engine)** - **[v3.9.2 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控。**必须消费对齐时间戳的统一快照 (`DecisionSnapshot`)**，彻底消灭数据撕裂。回答“在这个快照状态下，系统应该持有多少敞口？”。
     *   **硬性拦截 (Hard Vetoes)**：处理状态过期或 Regime 切换期的迟滞。
     *   **杠杆阻尼 (Leverage Caps)**：在高风险 ($P_{24h\_Risk} > 0.85$) 期间强制压低总目标敞口上限。
     *   **摩擦精算 (Friction-Aware Optimization)**：在安全边界内，计算出包含 `target_spot_beta` 与 `target_futures_hedge_ratio` 的纯净“目标敞口”。严禁在此层直接生成物理下单动作。
-*   **Stage 5: Execution (物理执行) (Execution Engine)** - **[v3.9.1 升级]**。系统的“脊髓反射”。纯粹的状态对齐器（Idempotent Reconciler）。它没有任何市场观点，完全不懂风控，只负责回答“怎么把实际仓位安全地变成目标仓位？”。
+*   **Stage 5: Execution (物理执行) (Execution Engine)** - **[v3.9.2 升级]**。系统的“脊髓反射”。纯粹的状态对齐器（Idempotent Reconciler）。它没有任何市场观点，完全不懂风控，只负责回答“怎么把实际仓位安全地变成目标仓位？”。
     *   **无状态对齐**：严格基于 `Target - EffectivePosition` 计算 Delta，将抽象意图转化为物理原语（Order Intents）。
     *   **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须根据订单生命周期（已提交、已挂单、撤销中）进行概率折算，防止网络延迟导致的反向或重复发单。
     *   **意图感知撤单 (Intent-Aware Cancel)**：废除粗暴的批量撤单，仅外科手术式撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
@@ -111,7 +111,7 @@ To deploy this system locally, the scripts require the following APIs:
 
 ---
 
-## 📡 核心引擎：气象观测站 3.9.1 工作流
+## 📡 核心引擎：气象观测站 3.9.2 工作流
 
 该观测站由 6 位专职 Agent (基于 Gemini CLI Skills 构建) 组成，严格执行时间与数学上的递进逻辑：**底色 -> 偏移 -> 情绪 -> 扳机**。
 
