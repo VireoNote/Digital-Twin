@@ -11,108 +11,116 @@ def get_inbox_dir():
         return LOCAL_INBOX_DIR
     return INBOX_DIR
 
-def fetch_polymarket_events():
+def fetch_polymarket_markets():
     """
-    抓取 Polymarket 活跃的宏观 Events (大事件集群)
+    抓取 Polymarket 按 24 小时交易量排序的活跃 Markets
     """
-    url = "https://gamma-api.polymarket.com/events?limit=50&active=true&closed=false"
+    # Fetch top 100 to ensure we have enough after filtering out sports
+    url = "https://gamma-api.polymarket.com/markets?limit=100&active=true&closed=false&order=volume24hr&ascending=false"
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req) as response:
             return json.loads(response.read().decode())
     except Exception as e:
-        print(f"Error fetching Polymarket Events: {e}")
-        return None
+        print(f"Error fetching Polymarket Markets: {e}")
+        return []
 
-def process_radar_data(events):
-    filtered_events = []
-    if not events:
-        return filtered_events
+def process_radar_data(markets):
+    filtered_markets = []
+    if not markets:
+        return filtered_markets
         
-    for event in events:
+    sports_keywords = ['sports', 'nba', 'soccer', 'nfl', 'hockey', 'baseball', 'sport', 'premier league', 'la liga', 'champions league', 'tennis', 'f1']
+
+    for market in markets:
         try:
-            # 1. 计算整个 Event 的总交易量
-            volume = 0
-            if 'volume' in event:
-                volume = float(event['volume'])
-            elif 'markets' in event and len(event['markets']) > 0:
-                volume = sum(float(m.get('volume', 0)) for m in event['markets'])
-                
-            # 过滤规则: 仅抓取资金量 > 100万美金的大事件
-            if volume < 1000000:
+            # 1. 获取基础信息
+            question = market.get('question', 'Unknown Question')
+            volume24hr = float(market.get('volume24hr', 0))
+            
+            # 2. 提取父级 Event 的 Tags 和 Title
+            tags = []
+            event_title = ""
+            events = market.get('events', [])
+            if events and len(events) > 0:
+                parent_event = events[0]
+                event_title = parent_event.get('title', '')
+                tags = [t.get('label') for t in parent_event.get('tags', []) if 'label' in t]
+            
+            # 3. 过滤体育类赛事
+            lower_tags = [t.lower() for t in tags]
+            # Check tags
+            if any(word in lower_tags for word in sports_keywords) or any('sport' in t for t in lower_tags):
+                continue
+            
+            # Also check question/event_title aggressively
+            q_lower = question.lower() + " " + event_title.lower()
+            sports_phrases = ['nba', 'nfl', 'soccer', 'nhl', 'fifa', 'la liga', 'premier league', ' vs ', ' vs. ', 'fc ', 'champions league', 'tennis', 'f1', 'basketball', 'baseball', 'hockey', 'super bowl', 'world cup', 'mlb', ' ufc ', 'mma']
+            if any(phrase in q_lower for phrase in sports_phrases):
                 continue
 
-            title = event.get('title', event.get('ticker', 'Unknown Event'))
+            # 4. 解析最高概率
+            outcomes = json.loads(market.get('outcomes', '[]'))
+            prices = json.loads(market.get('outcomePrices', '[]'))
             
-            # 2. 提取该事件下胜率最高的活跃子市场 (Top Outcome)
-            top_outcome = "Unknown"
             highest_prob = 0.0
+            top_outcome_name = ""
             
-            if 'markets' in event and len(event['markets']) > 0:
-                for market in event['markets']:
-                    if not market.get('active') or market.get('closed'):
-                        continue
-                    try:
-                        prices = json.loads(market.get('outcomePrices', '[]'))
-                        outcomes = json.loads(market.get('outcomes', '[]'))
-                        if len(prices) > 0 and len(outcomes) > 0:
-                            price = float(prices[0])
-                            if price > highest_prob:
-                                highest_prob = price
-                                if outcomes[0].lower() == 'yes':
-                                    top_outcome = market.get('question', 'Yes').replace('?', '')
-                                else:
-                                    top_outcome = outcomes[0]
-                    except:
-                        pass
+            for i, p_str in enumerate(prices):
+                p = float(p_str)
+                if p > highest_prob:
+                    highest_prob = p
+                    top_outcome_name = outcomes[i] if i < len(outcomes) else "Unknown"
+
+            # format the question appropriately (if it's a Yes/No market)
+            if len(outcomes) == 2 and "Yes" in outcomes and "No" in outcomes:
+                display_outcome = f"{top_outcome_name} ({question})"
+            else:
+                display_outcome = f"{top_outcome_name}"
             
-            # 提取标签，辅助 L3 判断领域
-            tags = [t.get('label') for t in event.get('tags', []) if 'label' in t]
-            
-            filtered_events.append({
-                'title': title,
-                'volume': volume,
-                'top_outcome': top_outcome,
+            filtered_markets.append({
+                'title': event_title if event_title else question,
+                'question': question,
+                'volume24hr': volume24hr,
+                'top_outcome': display_outcome,
                 'highest_prob': highest_prob,
-                'tags': tags[:3] # 取前三个主要标签
+                'tags': tags[:3]
             })
             
         except Exception as e:
             continue
             
-    # 按交易量从大到小排序，只取前 10 个最具影响力的事件
-    filtered_events = sorted(filtered_events, key=lambda x: x['volume'], reverse=True)[:10]
-    return filtered_events
+    # 只取过滤后的前 50 个
+    return filtered_markets[:50]
 
 def main():
-    print("Fetching Doppler Radar Data (Polymarket Events Endpoint)...")
-    events = fetch_polymarket_events()
-    high_impact_events = process_radar_data(events)
+    print("Fetching Doppler Radar Data (Polymarket Markets Endpoint)...")
+    markets = fetch_polymarket_markets()
+    high_impact_markets = process_radar_data(markets)
     
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     target_dir = get_inbox_dir()
     file_path = os.path.join(target_dir, f"doppler_radar_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
     
-    markdown_content = f"""# 多普勒雷达专员 观测报告 (v2.2 宏观全景版)
+    markdown_content = f"""# 多普勒雷达专员 观测报告 (v2.3 高频流动性版)
 **生成时间**: {now}
-**数据源**: Polymarket Gamma API (/events)
+**数据源**: Polymarket Gamma API (/markets?order=volume24hr)
 
 ## 叙事溢价补偿 (Narrative Premium) 扫描结果
-**过滤规则**: 提取全网交易量 > $1,000,000 的高共识宏观/政治/经济事件，并锁定其中呼声最高的情景。
+**过滤规则**: 提取全网 24 小时交易量最大的前 50 个独立预测市场 (已过滤体育赛事)。
 
 """
     
-    if not high_impact_events:
-        markdown_content += "\n*当前雷达屏幕平静，未扫描到大资金驱动的叙事。*\n"
+    if not high_impact_markets:
+        markdown_content += "\n*当前雷达屏幕平静，未扫描到符合条件的叙事。*\n"
     else:
-        for ev in high_impact_events:
-            tags_str = ", ".join(ev['tags'])
-            markdown_content += f"\n### 📡 {ev['title']}\n"
-            markdown_content += f"- **资金深度 (Volume)**: ${ev['volume']:,.2f}\n"
+        for idx, m in enumerate(high_impact_markets, 1):
+            tags_str = ", ".join(m['tags'])
+            markdown_content += f"\n### 📡 {idx}. {m['question']}\n"
+            markdown_content += f"- **24H 资金流转 (Volume 24h)**: ${m['volume24hr']:,.2f}\n"
             markdown_content += f"- **板块标签**: [{tags_str}]\n"
-            markdown_content += f"- **当前最热押注 (Top Outcome)**: {ev['top_outcome']}\n"
-            markdown_content += f"- **隐含发生概率**: {ev['highest_prob'] * 100:.1f}%\n"
-            markdown_content += "> **评估指令**: 请系统预报中心研判该预期结果是否会对加密货币或美元流动性产生宏观利好(I>0)或利空(I<0)，并计入叙事溢价。\n"
+            markdown_content += f"- **当前最热押注 (Top Outcome)**: {m['top_outcome']}\n"
+            markdown_content += f"- **隐含发生概率**: {m['highest_prob'] * 100:.1f}%\n"
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(markdown_content)

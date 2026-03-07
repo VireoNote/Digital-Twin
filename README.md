@@ -10,21 +10,21 @@ This system completely abandons the traditional "multi-factor equal-weight stew"
 
 The system follows a strict physical hierarchy to ensure the underlying logic remains immutable, while upper-level beliefs can continuously evolve with data:
 
-*   **[Tier 1] The Raw Events (L1)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
-*   **[Tier 2] The Data & Feature Pipelines (L2)** - Association, Alignment, and De-biasing. A monolithic RAG is fundamentally flawed for time-series and causality. Tier 2 is split into:
-    *   **Tier 2.1 Text Embeddings**: Vector DB for text, news, and narrative retrieval.
-    *   **Tier 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
-    *   **Tier 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
-*   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
-*   **[Tier 2.7] The Decision Engine** - **[Upgraded in v3.9.1]**. The strategic "frontal lobe" of the system. It strictly translates a unified `DecisionSnapshot` (atomically merging Features, State, and Constraints to prevent clock-skew) into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
+*   **[Stage 1] Ingest (Raw Events)** - Chaos and Inclusion. It ingests all raw, unpolished information fragments (API scraped data, research clippings). **Boundary:** Append-only. No modification of raw truth.
+*   **[Stage 2] Features (Data Pipelines)** - Association, Alignment, and De-biasing. A monolithic RAG is fundamentally flawed for time-series and causality. Tier 2 is split into:
+    *   **Stage 2.1 Text Embeddings**: Vector DB for text, news, and narrative retrieval.
+    *   **Stage 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
+    *   **Stage 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
+*   **[Stage 3] State (Probabilistic Machine)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
+*   **[Stage 4] Decision (Policy Engine)** - **[Upgraded in v3.9.1]**. The strategic "frontal lobe" of the system. It strictly translates a unified `DecisionSnapshot` (atomically merging Features, State, and Constraints to prevent clock-skew) into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
     *   **Hard Vetoes**: Intercepts expired states or regime hysteresis.
     *   **Leverage Caps**: Dynamically clamps total gross exposure during high-risk regimes (`P_24h_Risk > 0.85`).
     *   **Friction-Aware Optimization**: Calculates the optimal `target_spot_beta` and `target_futures_hedge_ratio` within the allowed boundaries.
-*   **[Tier 2.8] The Execution Engine (Idempotent Reconciler)** - **[Upgraded in v3.9.1]**. The stateless "spinal cord". It possesses no market views or risk logic. It purely calculates how to safely transition from the current physical state to the `Target Exposure`.
+*   **[Stage 5] Execution (Idempotent Reconciler) (Idempotent Reconciler)** - **[Upgraded in v3.9.1]**. The stateless "spinal cord". It possesses no market views or risk logic. It purely calculates how to safely transition from the current physical state to the `Target Exposure`.
     *   **State Reconciliation**: Strictly calculates `Delta = Target - EffectivePosition`.
     *   **In-flight Discounting**: Computes `EffectivePosition` by discounting pending orders based on their lifecycle state, preventing over-trading during network latency.
     *   **Intent-Aware Cancel**: Generates cancel intents surgically only for stale, opposing, or out-of-bounds orders, preserving API limits.
-*   **[Tier 3] The Constraints & Specifications (L3)** - The immutable global configuration and hard boundary layer. **Boundary:** Read-only for all operational agents. Tier 3 MUST ONLY store structural declarations (e.g., allowed state variables and their schemas), mathematical methodologies (e.g., specific Z-Score calculation logic), and strict system constraints (e.g., `max_gross_leverage`, validity decay rules). **It is strictly prohibited to store any directional market beliefs, current regime interpretations, or dynamic empirical thresholds in this tier.** Tier 3 operates as the static rule engine defining what is mathematically and logically permissible within the system.
+*   **[Stage 0] Constraints & Specifications** - The immutable global configuration and hard boundary layer. **Boundary:** Read-only for all operational agents. Tier 3 MUST ONLY store structural declarations (e.g., allowed state variables and their schemas), mathematical methodologies (e.g., specific Z-Score calculation logic), and strict system constraints (e.g., `max_gross_leverage`, validity decay rules). **It is strictly prohibited to store any directional market beliefs, current regime interpretations, or dynamic empirical thresholds in this tier.** Tier 3 operates as the static rule engine defining what is mathematically and logically permissible within the system.
 
 ---
 
@@ -52,7 +52,7 @@ Monitors the market to find exhaustion or breakout points in sentiment. *Static 
 The system strictly separates the physical execution path from human-readable environmental interpretations. The "View Layer" is explicitly demoted to a pure logging/audit artifact and does NOT participate in the control loop.
 
 **The Critical Execution Path:**
-The system logic strictly flows via: `Features (L2) ➡️ Derived State (L2.5) ➡️ Policy Target Exposure (L2.7) ➡️ Idempotent Execution (L2.8)`.
+The system logic strictly flows via: `Features (L2) ➡️ Derived State (Stage 3) ➡️ Policy Target Exposure (L2.7) ➡️ Idempotent Execution (L2.8)`.
 1. **$P_{30d\_Tailwind}$ ➡️ Spot Base Exposure**: Dictates the core baseline direction.
 2. **$P_{7d\_Continuation}$ ➡️ Mid-term Hedging**: Dictates the offensive/defensive tilt.
 3. **$P_{24h\_Adverse\_Risk}$ ➡️ Risk Gate & Circuit Breaker**: The highest priority defense. Triggers L2.7 Risk Damper to force leverage cuts.
@@ -93,21 +93,21 @@ To deploy this system locally, the scripts require the following APIs:
 
 系统遵循严密的物理层级隔离，确保底层逻辑不可篡改，而上层信念可以随数据持续演化：
 
-*   **L1：感知之海 (Inbox)** - 混沌与包容。接纳所有未经雕琢的原始信息碎片。**物理边界**：仅限追加 (Append-only)，保留真实。
-*   **L2：结构化潜意识 (Subconscious Structure)** - 联想、对齐与消偏。废除单一 RAG 的黑盒（RAG 无法处理时序与因果），将其拆分为三层物理组件：
-    *   **L2.1 语义记忆 (Semantic Memory)**：向量库，仅负责新闻、文本、研报的向量化召回与模糊联想。
-    *   **L2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
-    *   **L2.3 事件归并表 (Event Ledger)**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
-*   **L2.5：状态寄存器 (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
-*   **L2.7：决策引擎 (Decision Engine)** - **[v3.9.1 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控。**必须消费对齐时间戳的统一快照 (`DecisionSnapshot`)**，彻底消灭数据撕裂。回答“在这个快照状态下，系统应该持有多少敞口？”。
+*   **Stage 1: Ingest (原始感知)** - 混沌与包容。接纳所有未经雕琢的原始信息碎片。**物理边界**：仅限追加 (Append-only)，保留真实。
+*   **Stage 2: Features (特征组装)** - 联想、对齐与消偏。废除单一 RAG 的黑盒（RAG 无法处理时序与因果），将其拆分为三层物理组件：
+    *   **Stage 2.1 语义记忆 (Semantic Memory)**：向量库，仅负责新闻、文本、研报的向量化召回与模糊联想。
+    *   **Stage 2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
+    *   **Stage 2.3 事件归并表 (Event Ledger)**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
+*   **Stage 3: State (认知推演) (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
+*   **Stage 4: Decision (决策求解) (Decision Engine)** - **[v3.9.1 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控。**必须消费对齐时间戳的统一快照 (`DecisionSnapshot`)**，彻底消灭数据撕裂。回答“在这个快照状态下，系统应该持有多少敞口？”。
     *   **硬性拦截 (Hard Vetoes)**：处理状态过期或 Regime 切换期的迟滞。
     *   **杠杆阻尼 (Leverage Caps)**：在高风险 ($P_{24h\_Risk} > 0.85$) 期间强制压低总目标敞口上限。
     *   **摩擦精算 (Friction-Aware Optimization)**：在安全边界内，计算出包含 `target_spot_beta` 与 `target_futures_hedge_ratio` 的纯净“目标敞口”。严禁在此层直接生成物理下单动作。
-*   **L2.8：执行引擎 (Execution Engine)** - **[v3.9.1 升级]**。系统的“脊髓反射”。纯粹的状态对齐器（Idempotent Reconciler）。它没有任何市场观点，完全不懂风控，只负责回答“怎么把实际仓位安全地变成目标仓位？”。
+*   **Stage 5: Execution (物理执行) (Execution Engine)** - **[v3.9.1 升级]**。系统的“脊髓反射”。纯粹的状态对齐器（Idempotent Reconciler）。它没有任何市场观点，完全不懂风控，只负责回答“怎么把实际仓位安全地变成目标仓位？”。
     *   **无状态对齐**：严格基于 `Target - EffectivePosition` 计算 Delta，将抽象意图转化为物理原语（Order Intents）。
     *   **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须根据订单生命周期（已提交、已挂单、撤销中）进行概率折算，防止网络延迟导致的反向或重复发单。
     *   **意图感知撤单 (Intent-Aware Cancel)**：废除粗暴的批量撤单，仅外科手术式撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
-*   **L3：规范与约束注册表 (Specification & Constraint Registry)** - 不可变的全局配置与强边界层。**物理边界**：对所有动态运行的 Agent 绝对只读。L3 必须且只能存储结构化声明（如合法的状态变量及 Schema）、数学方法论（如特定 Z-Score 计算逻辑）以及硬性系统约束（如 `max_gross_leverage`、状态衰减规则）。**严禁在此层存储任何方向性市场观点、当前 Regime 状态解释或动态经验阈值。** L3 作为静态规则引擎，定义系统内什么是数学和逻辑上被允许的。
+*   **Stage 0: Constraints (规范与约束注册表) (Specification & Constraint Registry)** - 不可变的全局配置与强边界层。**物理边界**：对所有动态运行的 Agent 绝对只读。L3 必须且只能存储结构化声明（如合法的状态变量及 Schema）、数学方法论（如特定 Z-Score 计算逻辑）以及硬性系统约束（如 `max_gross_leverage`、状态衰减规则）。**严禁在此层存储任何方向性市场观点、当前 Regime 状态解释或动态经验阈值。** L3 作为静态规则引擎，定义系统内什么是数学和逻辑上被允许的。
 
 ---
 
@@ -135,10 +135,10 @@ To deploy this system locally, the scripts require the following APIs:
 系统明确将“关键交易路径”与“人类可读的环境解释”进行物理隔离。**“观点层 (View Layer)”被彻底降级为纯粹的日志与审计输出，不参与任何实际的控制闭环**。
 
 **核心控制链路 (The Critical Execution Path)：**
-交易决策严格遵循单向物理链路：`特征 (L2) ➡️ 衍生状态 (L2.5) ➡️ 策略目标敞口 (L2.7) ➡️ 幂等执行 (L2.8)`。
+交易决策严格遵循单向物理链路：`特征 (L2) ➡️ 衍生状态 (Stage 3) ➡️ 策略目标敞口 (L2.7) ➡️ 幂等执行 (L2.8)`。
 1. **战略底仓 ($P_{30d\_Tailwind}$)**：决定核心现货的基准暴露方向与最大风险预算。
 2. **中期倾斜 ($P_{7d\_Continuation}$)**：决定波段仓位的攻防倾斜与衍生品对冲比例。
-3. **风险闸门 ($P_{24h\_Adverse\_Risk}$)**：最高优先级防守。高风险时直接触发 L2.7 阻尼器，强制收缩杠杆。
+3. **风险闸门 ($P_{24h\_Adverse\_Risk}$)**：最高优先级防守。高风险时直接触发 Stage 4 阻尼器，强制收缩杠杆。
 
 **审计视图 (The Audit View - 不参与执行)：**
 1. **Regime 状态定调**：生成用于人类复盘审计的绝对“天气标签”（如：宽裕但极度脆弱）。
