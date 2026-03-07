@@ -16,9 +16,9 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
 2. **L2.2 Feature Store (时序特征库)**：
    - **物理路径**：`/home/liwu/digital_twin/Feature_Store/`
    - **职责**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
-3. **L2.3 Evidence Graph (证据图谱)**：
-   - **物理路径**：`/home/liwu/digital_twin/Evidence_Graph/`
-   - **职责**：消除多重共线性（Multi-collinearity）。把“同一件事”在新闻、Polymarket、价格中的多个投影连起来，防止在后验推断中被多次重复加分。
+3. **L2.3 Event Ledger (事件归并表)**：
+   - **物理路径**：`/home/liwu/digital_twin/Event_Ledger/`
+   - **职责**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
 
 ### L2.5：概率状态机 (Probabilistic State Machine, 原信念层)
 - **物理路径**：`/home/liwu/digital_twin/State_Register/` (包含生成的快照与 Schema)
@@ -28,20 +28,21 @@ RAG 无法处理时序与因果，因此 L2 被严格拆分为三大物理组件
   - **有限状态机转移 (Transition Rules)**：状态的演化必须通过 `Ontology/state_transition_rules.md` 中的“写入前自检”。例如：Regime 切换强制导致旧的 30d 概率置信度归零；跨频率（如30d与7d）的概率冲突必须带有明确的底层证据解释，否则不予写入。
   - 这是系统真正发生“学习与自我演化”的发生地。
 
-### L2.7：策略内核 (Policy Kernel) - 混合控制架构
-- **物理路径**：`/home/liwu/digital_twin/Policy_Kernel/`
+### L2.7：决策引擎 (Decision Engine)
+- **物理路径**：`/home/liwu/digital_twin/Decision_Engine/`
 - **执行边界**：
-  - 严禁将 L2.5 的状态概率直接连接到执行层（下单API）。
-  - **Stage A (离散的权力边界)**：基于宪法层 `policy_constraints.md` 执行硬规则过滤（状态过期截断、24h 高风险降杠杆、Regime 切换迟滞）。
-  - **Stage B (连续的数值解算)**：在 Stage A 放行后，综合 30d/7d/24h 概率与调仓摩擦成本，计算连续的 `target_spot_beta` 与 `target_futures_hedge_ratio`。
-  - **最终输出**：将抽象的策略目标以 `Target Intent` 形式发送给 Execution Kernel。
+  - **统揽策略与风控**：系统的“大脑皮层”。回答“在这个市场状态下，系统应该持有多少敞口？”
+  - **输入**：`Features` (特征) + `Derived State` (认知概率) + `Constraints` (L3 宪法红线)。
+  - **内部逻辑**：全权负责 Hard Veto (时效拦截)、Leverage Cap (风险阻尼器降杠杆)、Hysteresis (防抖迟滞) 和 Friction-Aware Optimization (摩擦成本精算)。
+  - **唯一输出**：纯净的 `Target Exposure`（目标敞口字典）。严禁在此层输出具体的撤单或下单指令。
 
-### L2.8：执行内核 (Execution Kernel) - 幂等重平衡
+### L2.8：执行引擎 (Execution Engine) - 幂等重平衡
 - **物理路径**：`/home/liwu/digital_twin/Execution_Kernel/`
 - **执行边界**：
-  - **目标驱动，非动作驱动**：彻底废除 `Buy/Sell` 的动作指令。每次循环生成包含 `intent_hash` 的快照。
+  - **无状态对齐器**：系统的“脊髓反射”。没有任何市场观点，不懂风控。只回答“怎么把实际仓位安全地变成目标仓位？”
+  - **输入**：`Target Exposure` (来自 L2.7) + `Effective Position` (当前有效仓位) + `Live Orders` (在途挂单)。
   - **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须按照 `CONFIRMED_OPEN`、`PENDING_CANCEL` 等状态进行概率折算。
-  - **意图感知撤单 (Intent-Aware Cancel)**：拒绝无脑 `Cancel All`。仅撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
+  - **唯一输出**：离散的物理动作 (`Order Intents` 和 `Cancel Intents`)。意图感知撤单，拒绝无脑 `Cancel All`。
 
 ### L3：规范与约束注册表 (Specification & Constraint Registry)
 - **物理路径**：`/home/liwu/digital_twin/Ontology/` (包含 `tier3_spec.yaml` 等)

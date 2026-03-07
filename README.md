@@ -16,13 +16,14 @@ The system follows a strict physical hierarchy to ensure the underlying logic re
     *   **Tier 2.2 Time-series Features**: Strictly manages time-series numerical features (RRP, OI, Velocity) to ensure temporal alignment and prevent LLM hallucination on numbers.
     *   **Tier 2.3 Event Ledger**: A typed event ledger using `canonical_event_name` and `overlap_group` to deduplicate and merge projections of the "same underlying event" across News, Polymarket, and Yields, preventing multi-counting in inference. Replaces graph-based paradigms with a flat relational schema.
 *   **[Tier 2.5] The Derived State (L2.5)** - Deduction and Calibration. **[Where Bayesian Calibration Happens]**. It explicitly rejects low-density natural language narratives (e.g., "Market nervous", "Macro bullish"). Instead, it acts as a high-density register holding a small set of mutable, mathematical state variables (e.g., `Regime=Loose_Fragile`, `P_30d=0.65`, `P_24h_Risk=0.8`). **Boundary:** These are probabilistic objects that are continuously overwritten or rolled back as new Evidence arrives via out-of-sample calibration.
-*   **[Tier 2.7] The Policy Kernel (Hybrid Control Architecture)** - **[New in v3.6]**. Converts continuous cognitive probabilities into discrete target exposures. It operates a hybrid model:
-*   **[Tier 2.8] The Execution Kernel (Idempotent Rebalance Cycle)** - **[New in v3.7]**. Replaces direct action commands (Buy/Sell) with a state-reconciliation engine.
-    *   **Intent-Driven**: Operates strictly on `Target Exposure - Effective Position`.
-    *   **In-flight Discounting**: Calculates `EffectivePosition` by discounting pending orders based on their state to prevent over-trading during network latency.
-    *   **Intent-Aware Cancel**: Surgically cancels only stale or conflicting orders rather than a blind 'Cancel All', preserving API limits and orderbook priority.
-    *   **Stage A (Discrete Power Boundaries)**: Enforces non-negotiable institutional rules (e.g., Validity Kill Switch, 24h Risk Damper, Regime Hysteresis). Has absolute veto power.
-    *   **Stage B (Continuous Optimization)**: If Stage A permits, it calculates the optimal `target_spot_beta`, `target_futures_hedge_ratio`, and `max_gross_leverage` based on 30d/7d signals and friction costs.
+*   **[Tier 2.7] The Decision Engine** - **[Upgraded in v3.9]**. The strategic "frontal lobe" of the system. It strictly translates cognitive state into a desired portfolio. It outputs a pure `Target Exposure` dictionary and NEVER emits physical action commands.
+    *   **Hard Vetoes**: Intercepts expired states or regime hysteresis.
+    *   **Leverage Caps**: Dynamically clamps total gross exposure during high-risk regimes (`P_24h_Risk > 0.85`).
+    *   **Friction-Aware Optimization**: Calculates the optimal `target_spot_beta` and `target_futures_hedge_ratio` within the allowed boundaries.
+*   **[Tier 2.8] The Execution Engine (Idempotent Reconciler)** - **[Upgraded in v3.9]**. The stateless "spinal cord". It possesses no market views or risk logic. It purely calculates how to safely transition from the current physical state to the `Target Exposure`.
+    *   **State Reconciliation**: Strictly calculates `Delta = Target - EffectivePosition`.
+    *   **In-flight Discounting**: Computes `EffectivePosition` by discounting pending orders based on their lifecycle state, preventing over-trading during network latency.
+    *   **Intent-Aware Cancel**: Generates cancel intents surgically only for stale, opposing, or out-of-bounds orders, preserving API limits.
 *   **[Tier 3] The Constraints & Specifications (L3)** - The immutable global configuration and hard boundary layer. **Boundary:** Read-only for all operational agents. Tier 3 MUST ONLY store structural declarations (e.g., allowed state variables and their schemas), mathematical methodologies (e.g., specific Z-Score calculation logic), and strict system constraints (e.g., `max_gross_leverage`, validity decay rules). **It is strictly prohibited to store any directional market beliefs, current regime interpretations, or dynamic empirical thresholds in this tier.** Tier 3 operates as the static rule engine defining what is mathematically and logically permissible within the system.
 
 ---
@@ -98,12 +99,14 @@ To deploy this system locally, the scripts require the following APIs:
     *   **L2.2 时序特征库 (Feature Store)**：专门管理 WALCL, RRP, OI, Velocity 等高频数值特征。保障口径一致性与时序对齐，拒绝文本化污染。
     *   **L2.3 事件归并表 (Event Ledger)**：强类型事件账本。消除多重共线性（Multi-collinearity）。通过 `canonical_event_name` 和 `overlap_group` 把“同一件事”在新闻、Polymarket、价格中的多个投影去重归并，防止在后验推断中被多次重复加分。不支持也不需要复杂的图计算。
 *   **L2.5：状态寄存器 (State Register, 原信念层)** - 演绎与校准。**[系统演化的发生地]**。彻底摒弃“市场恐慌”、“宏观向好”等低密度、易重复的自然语言叙事。它是一个高密度的变量寄存器，仅保存少量、可更新、直接影响决策的核心数学状态（如 `Regime=Loose_Fragile`, `P_30d_Tailwind=0.65`, `P_24h_Risk=0.8`）。**物理边界**：这些状态是概率对象，随着最新观测证据的涌入，必须不断被严格覆盖、校准或回滚。
-*   **L2.7：策略内核 (Policy Kernel)** - **[v3.6 新增：混合控制架构]**。作为信念层与执行层之间的隔离转换器，解决“连续认知概率”与“离散执行动作”的映射问题。
-*   **L2.8：执行内核 (Execution Kernel)** - **[v3.7 新增：幂等重平衡]**。彻底废除“买入/卖出”动作指令，转向“状态对齐 (State Reconciliation)”。
-    *   **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，根据订单生命周期（已提交、已挂单、撤销中）进行概率折算，防止网络延迟导致的反向或重复发单。
+*   **L2.7：决策引擎 (Decision Engine)** - **[v3.9 升级]**。系统的“大脑皮层前额叶”。全权统揽策略与风控，回答“在这个市场状态下，系统应该持有多少敞口？”。
+    *   **硬性拦截 (Hard Vetoes)**：处理状态过期或 Regime 切换期的迟滞。
+    *   **杠杆阻尼 (Leverage Caps)**：在高风险 ($P_{24h\_Risk} > 0.85$) 期间强制压低总目标敞口上限。
+    *   **摩擦精算 (Friction-Aware Optimization)**：在安全边界内，计算出包含 `target_spot_beta` 与 `target_futures_hedge_ratio` 的纯净“目标敞口”。严禁在此层直接生成物理下单动作。
+*   **L2.8：执行引擎 (Execution Engine)** - **[v3.9 升级]**。系统的“脊髓反射”。纯粹的状态对齐器（Idempotent Reconciler）。它没有任何市场观点，完全不懂风控，只负责回答“怎么把实际仓位安全地变成目标仓位？”。
+    *   **无状态对齐**：严格基于 `Target - EffectivePosition` 计算 Delta，将抽象意图转化为物理原语（Order Intents）。
+    *   **在途折算 (Effective Position)**：严禁将未确认状态粗暴加总，必须根据订单生命周期（已提交、已挂单、撤销中）进行概率折算，防止网络延迟导致的反向或重复发单。
     *   **意图感知撤单 (Intent-Aware Cancel)**：废除粗暴的批量撤单，仅外科手术式撤销与当前目标方向相反、尺寸超载或价格偏离的冲突订单。
-    *   **Stage A (离散权力边界)**：执行不可商量的制度红线（如状态过期截断、24h 高风险强制降杠杆、Regime 切换迟滞窗）。一票否决。
-    *   **Stage B (连续数值解算)**：在边界内，综合 30d/7d/24h 概率与摩擦成本，计算最优的 `target_spot_beta` 与 `target_futures_hedge_ratio`。
 *   **L3：规范与约束注册表 (Specification & Constraint Registry)** - 不可变的全局配置与强边界层。**物理边界**：对所有动态运行的 Agent 绝对只读。L3 必须且只能存储结构化声明（如合法的状态变量及 Schema）、数学方法论（如特定 Z-Score 计算逻辑）以及硬性系统约束（如 `max_gross_leverage`、状态衰减规则）。**严禁在此层存储任何方向性市场观点、当前 Regime 状态解释或动态经验阈值。** L3 作为静态规则引擎，定义系统内什么是数学和逻辑上被允许的。
 
 ---
