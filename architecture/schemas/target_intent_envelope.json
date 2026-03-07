@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Target Intent Envelope (Causal Lineage)",
+  "description": "Strictly typed envelope emitted by the Decision Engine (L2.7). It forces the inclusion of causality lineage to ensure every target exposure can be traced back to its specific cognitive and environmental roots.",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "lineage",
+    "target_exposure"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "description": "Unique identifier for this specific decision output. Must be propagated to the exchange's clientOid by L2.8."
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "state_version",
+        "constraint_version",
+        "market_snapshot_id"
+      ],
+      "properties": {
+        "state_version": {
+          "type": "string",
+          "description": "The exact ID/hash of the Probabilistic State (L2.5) used to make this decision."
+        },
+        "constraint_version": {
+          "type": "string",
+          "description": "The version hash of the Tier 3 Specifications & Constraints active during this decision."
+        },
+        "market_snapshot_id": {
+          "type": "string",
+          "description": "The ID/hash of the raw market feature data (L2.2) observed at decision time."
+        }
+      }
+    },
+    "target_exposure": {
+      "type": "object",
+      "description": "The desired portfolio composition.",
+      "properties": {
+        "spot_targets": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Target beta/allocation for spot assets (e.g., {'BTCUSDT': 0.4})."
+        },
+        "futures_hedge_targets": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Target short allocations for hedging (e.g., {'BTCUSDT': -0.1})."
+        }
+      }
+    }
+  }
+}

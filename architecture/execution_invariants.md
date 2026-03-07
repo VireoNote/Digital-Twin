@@ -20,6 +20,7 @@
   3. **价格脱离区间 (Price Out-of-bounds)**：限价单价格偏离当前 Orderbook 超过允许范围（不再服务于当前 Diff）。
 - 符合上述任何一条的订单标记为 `Stale` 并加入撤单队列；其他订单保留。
 
-## 3. 重平衡循环的原子性 (Atomic Rebalance Cycle)
-- 每次执行循环必须生成一个唯一的 `cycle_id`。
-- 当前循环下达的所有的 `Cancel` 和 `Place` 操作，必须在日志或 `clientOid` 中携带这个 `cycle_id` 和当前的 `intent_hash`，以确保动作的原子归属性。
+## 3. 重平衡循环的原子性与溯源 (Atomic Rebalance & Lineage Tracing)
+- **强类型因果信封 (Causal Envelope)**：L2.8 接收的 Target Intent 必须是一个包含 `decision_id` 及其 `lineage` (state_version, constraint_version, market_snapshot_id) 的信封对象。
+- **ClientOid 挂载强制要求**：每次执行循环下达的所有的物理 `Cancel` 和 `Place` 操作，**必须将 `decision_id` 注入到交易所的 `clientOid` (或作为前缀/后缀)**。
+- 只有这样，当发生异常或回测对账时，我们才能从交易所的订单历史上直接反查出：这笔订单是在哪个特征窗口下、基于哪个版本的认知状态、被哪版风控规则放行的。
