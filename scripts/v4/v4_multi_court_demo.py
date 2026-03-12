@@ -110,32 +110,126 @@ def policy_pressure_validator(intent_bias: str, evidence_content: str) -> Dict[s
         "notes": f"TIPS={tips}% (Tight={is_tight}) vs Intent={intent_bias.upper()}"
     }
 
+def crypto_weather_validator(intent_bias: str, evidence_content: str) -> Dict[str, Any]:
+    """
+    衍生品法官：识别博弈结构（OI, Funding, Squeeze）。
+    重点提供 Tactical Release 理由。
+    """
+    # 提取关键指标
+    price_change_match = re.search(r'当前价格 \(BTC\): .*?\(24H:\s*([+-]?[\d\.]+)\%\)', evidence_content)
+    funding_match = re.search(r'资金费率 \(Funding Rate\):\s*([+-]?[\d\.]+)%', evidence_content)
+    oi_1h_match = re.search(r'OI 1H 变化率\:\s*([+-]?[\d\.]+)%', evidence_content)
+    behavior_match = re.search(r'当前资金面状态\*\*: .*? ([\w\s-]+) \(', evidence_content)
+
+    price_change = float(price_change_match.group(1)) if price_change_match else 0.0
+    funding = float(funding_match.group(1)) if funding_match else 0.0
+    oi_1h = float(oi_1h_match.group(1)) if oi_1h_match else 0.0
+    behavior_raw = behavior_match.group(1).strip() if behavior_match else "Unknown"
+
+    support = 0.5
+    contradiction = 0.1
+    tactical_release = False
+    notes = [f"Behavior: {behavior_raw}, Funding: {funding}%"]
+
+    # 1. 识别 Short Covering (空头回补 - 价格涨, OI减)
+    if price_change > 0 and oi_1h < -0.5:
+        notes.append("Detected potential Short Covering (空头认亏平仓)")
+        if intent_bias == "long":
+            support = 0.75
+            tactical_release = True
+            
+    # 2. 识别空头衰竭 (Exhaustion - 费率极负且跌不动)
+    if funding < -0.01 and abs(price_change) < 1.0:
+        notes.append("Detected Short Exhaustion (空头衰竭/费率深负)")
+        if intent_bias == "long":
+            support = 0.8
+            tactical_release = True
+
+    # 3. 对抗性识别：Long Build-up vs Intent
+    if "Long Build-up" in behavior_raw:
+        if intent_bias == "long": support = 0.85
+        if intent_bias == "short": contradiction = 0.8
+
+    return {
+        "family": "derivatives_structure",
+        "support": support,
+        "contradiction": contradiction,
+        "tactical_release": tactical_release,
+        "notes": " | ".join(notes)
+    }
+
+def spot_confirmation_validator(intent_bias: str, evidence_content: str) -> Dict[str, Any]:
+    """
+    现货确认法官：盯住 ETF 资金流向与现货溢价。
+    """
+    # 提取 IBIT 交易量
+    etf_vol_match = re.search(r'贝莱德现货 ETF \(IBIT\): .*?单日交易量:\s*([\d,]+)\)', evidence_content)
+    # 提取是否提及“狂热”或“申购”
+    inflow_hint = "ETF 大量申购" in evidence_content or "现货支撑" in evidence_content
+
+    etf_vol = int(etf_vol_match.group(1).replace(",", "")) if etf_vol_match else 0
+    
+    support = 0.5
+    contradiction = 0.1
+    offensive_alpha = False
+    notes = [f"IBIT Vol: {etf_vol}"]
+
+    if intent_bias == "long":
+        # 1. 如果 ETF 交易量巨大（假设 > 20M）或有流入暗示
+        if etf_vol > 20000000 or inflow_hint:
+            notes.append("Strong ETF demand detected (现货买盘确认)")
+            support = 0.85
+            offensive_alpha = True
+    
+    if intent_bias == "short":
+        if inflow_hint:
+            notes.append("Counter-trend Spot buy detected")
+            contradiction = 0.7
+
+    return {
+        "family": "spot_confirmation",
+        "support": support,
+        "contradiction": contradiction,
+        "offensive_alpha": offensive_alpha,
+        "notes": " | ".join(notes)
+    }
+
 def run_multi_court_validation(hyp: Hypothesis, intent: ActionIntent, evidences: List[EvidenceRecord]) -> ValidationReport:
     """
-    Validation Engine: 汇总多路法庭证词
+    Validation Engine v4.2: 汇总四路法庭证词 (Micro, Macro, Derivatives, Spot)
     """
     micro_ev = next(e for e in evidences if e.source == "crypto_micro")
     macro_ev = next(e for e in evidences if e.source == "policy_pressure")
+    weather_ev = next(e for e in evidences if e.source == "crypto_weather")
     
     micro_res = crypto_micro_validator(intent.primary_bias, micro_ev.raw_payload["content"])
     macro_res = policy_pressure_validator(intent.primary_bias, macro_ev.raw_payload["content"])
+    weather_res = crypto_weather_validator(intent.primary_bias, weather_ev.raw_payload["content"])
+    spot_res = spot_confirmation_validator(intent.primary_bias, micro_ev.raw_payload["content"]) # 复用 micro 里的 ETF 数据
 
-    # 聚合打分 (取最悲观的 contradiction 作为防御底线，平均 support 作为信心线)
-    overall_support = (micro_res["support"] + macro_res["support"]) / 2.0
-    overall_contradiction = max(micro_res["contradiction"], macro_res["contradiction"])
+    # 聚合打分
+    # 权重重新分配：三权分立的进攻性增强版
+    overall_support = (macro_res["support"] * 0.3) + \
+                      (micro_res["support"] * 0.3) + \
+                      (weather_res["support"] * 0.2) + \
+                      (spot_res["support"] * 0.2)
+                      
+    overall_contradiction = max(micro_res["contradiction"], macro_res["contradiction"], spot_res["contradiction"])
     
     any_conflict = micro_res["conflict"] or macro_res["conflict"]
     any_missing = micro_res["missing"] or macro_res["missing"]
     
-    validator_notes = [f"[Micro]: {micro_res['notes']}", f"[Macro]: {macro_res['notes']}"]
-    if micro_res["conflict"] != macro_res["conflict"]:
-        if macro_res["support"] > 0.5 and micro_res["conflict"]:
-            validator_notes.append(">> SPLIT COURT DETECTED: macro_support_micro_reject (背景改善，但场内没确认)")
-        elif micro_res["conflict"] and macro_res["support"] <= 0.5:
-            # Fallback for logical completeness in demo
-            validator_notes.append(">> SPLIT COURT DETECTED: macro_reject_micro_support (短线技术性支持，但大背景仍压制)")
-        else:
-            validator_notes.append(">> SPLIT COURT DETECTED: macro_reject_micro_support (短线技术性支持，但大背景仍压制)")
+    validator_notes = [
+        f"[Micro]: {micro_res['notes']}", 
+        f"[Macro]: {macro_res['notes']}", 
+        f"[Deriv]: {weather_res['notes']}",
+        f"[Spot]: {spot_res['notes']}"
+    ]
+    
+    if weather_res["tactical_release"]:
+        validator_notes.append(">> TACTICAL RELEASE GRANTED by Derivatives Judge")
+    if spot_res["offensive_alpha"]:
+        validator_notes.append(">> OFFENSIVE ALPHA confirmed by Spot Judge")
 
     return ValidationReport(
         validation_id=generate_id("val"),
@@ -143,7 +237,9 @@ def run_multi_court_validation(hyp: Hypothesis, intent: ActionIntent, evidences:
         intent_id=intent.intent_id,
         validator_family_scores={
             "macro_structure": macro_res["support"],
-            "liquidity_conversion": micro_res["support"]
+            "liquidity_conversion": micro_res["support"],
+            "derivatives_structure": weather_res["support"],
+            "spot_confirmation": spot_res["support"]
         },
         support_score=overall_support,
         contradiction_score=overall_contradiction,
@@ -164,41 +260,54 @@ def run_multi_court_validation(hyp: Hypothesis, intent: ActionIntent, evidences:
     )
 
 # =====================================================================
-# 2. POLICY COMPILER (学会处理分歧)
+# 2. POLICY COMPILER (处理现货溢价带来的灵活性)
 # =====================================================================
 
 def compile_policy_envelope(hyp: Hypothesis, intent: ActionIntent, val: ValidationReport) -> PolicyEnvelope:
     """
-    处理 3 种多法庭结果：放行(一致支持)、冻结(一致反对)、缩放(分裂)
+    处理 4 种多法庭结果。
     """
-    macro_score = val.validator_family_scores["macro_structure"]
-    micro_score = val.validator_family_scores["liquidity_conversion"]
-    
-    macro_support = macro_score > 0.5
-    micro_support = micro_score > 0.5
+    scores = val.validator_family_scores
+    macro_support = scores["macro_structure"] > 0.5
+    micro_support = scores["liquidity_conversion"] > 0.5
+    deriv_tactical = scores["derivatives_structure"] > 0.7
+    spot_support = scores["spot_confirmation"] > 0.7
 
     notes = []
     
-    # 场景 2：双反对 (一致否定) -> 冻结
-    if not macro_support and not micro_support:
+    # 场景 1：双主法官反对，但现货+衍生品强力支持 (现货驱动的战术解冻)
+    if not macro_support and not micro_support and (deriv_tactical or spot_support):
+        allowed_dir = intent.primary_bias
+        # 如果两位进攻法官都支持，给稍大一点的战术空间
+        upper = 0.15 if (deriv_tactical and spot_support) else 0.10
+        target_band = ExposureBand(lower=0.0, upper=upper)
+        aggression = "low"
+        c_mode = "tactical_only"
+        notes.append("Compiler Rule: DUAL REJECT but SPOT/DERIV OFFENSIVE PUSH")
+        
+    # 场景 2：真正的双反对 (全票否决)
+    elif not macro_support and not micro_support:
         allowed_dir = "neutral"
         target_band = ExposureBand(lower=0.0, upper=0.0)
         aggression = "low"
         c_mode = "frozen"
         notes.append("Compiler Rule: DUAL REJECT -> Vetoed/Frozen")
         
-    # 场景 3：分裂 (一支持一反对) -> 缩放
+    # 场景 3：分裂法庭 (正常逻辑)
     elif macro_support != micro_support:
         allowed_dir = intent.primary_bias
-        target_band = ExposureBand(lower=0.0, upper=0.15) # 极小仓位
+        limit = 0.25 if spot_support else 0.15
+        target_band = ExposureBand(lower=0.0, upper=limit) 
         aggression = "low"
         c_mode = "tactical_only"
-        notes.append("Compiler Rule: SPLIT COURT -> Scaled Down (Tactical Only)")
+        notes.append(f"Compiler Rule: SPLIT COURT -> Scaled Down (Spot {'Strong' if spot_support else 'Weak'})")
         
-    # 场景 1：双支持 (一致肯定) -> 放行
+    # 场景 4：放行
     else:
         allowed_dir = intent.primary_bias
-        target_band = ExposureBand(lower=0.2, upper=0.5)
+        # 即使放行，也要看现货脸色
+        upper_cap = 0.6 if spot_support else 0.4
+        target_band = ExposureBand(lower=0.2, upper=upper_cap)
         aggression = intent.aggression
         c_mode = "structural_allowed"
         notes.append("Compiler Rule: DUAL SUPPORT -> Admitted")

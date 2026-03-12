@@ -35,7 +35,7 @@ def determine_decision_delta_class(shadow_dir: str, legacy_dir: str, shadow_band
         return "same_direction_shadow_more_aggressive"
 
 
-def run_shadow_pass(legacy_direction: str, legacy_exposure: float, micro_content: str, macro_content: str):
+def run_shadow_pass(legacy_direction: str, legacy_exposure: float, micro_content: str, macro_content: str, weather_content: str):
     """
     执行单次影子编译与比对，并将结构化结果写入 JSONL
     """
@@ -45,6 +45,7 @@ def run_shadow_pass(legacy_direction: str, legacy_exposure: float, micro_content
     # 1. 挂载真实数据
     ev_micro = create_mock_evidence("crypto_micro", micro_content)
     ev_macro = create_mock_evidence("policy_pressure", macro_content)
+    ev_weather = create_mock_evidence("crypto_weather", weather_content)
     
     # 模拟当前的 LLM 认知倾向（这里为了 Demo 我们随机根据 legacy 逆推一个 mock 认知）
     # 真实场景应该调用 Gemini，这里用参数模拟
@@ -52,7 +53,7 @@ def run_shadow_pass(legacy_direction: str, legacy_exposure: float, micro_content
     hyp, intent = create_mock_cognition(hyp_bias, "Shadow LLM Analysis")
 
     # 2. 跑 Shadow 链路
-    report = run_multi_court_validation(hyp, intent, [ev_micro, ev_macro])
+    report = run_multi_court_validation(hyp, intent, [ev_micro, ev_macro, ev_weather])
     env = compile_policy_envelope(hyp, intent, report)
     
     # Lifecycle Mock 
@@ -135,6 +136,7 @@ if __name__ == "__main__":
     parser.add_argument("--legacy_exp", type=float, default=0.8)
     parser.add_argument("--micro_file", type=str, required=True, help="Path to latest crypto_micro markdown")
     parser.add_argument("--macro_file", type=str, required=True, help="Path to latest policy_pressure markdown")
+    parser.add_argument("--weather_file", type=str, required=True, help="Path to latest crypto_weather markdown")
     args = parser.parse_args()
 
     with open(args.micro_file, "r", encoding="utf-8") as f:
@@ -143,4 +145,7 @@ if __name__ == "__main__":
     with open(args.macro_file, "r", encoding="utf-8") as f:
         macro_content = f.read()
 
-    run_shadow_pass(args.legacy_dir, args.legacy_exp, micro_content, macro_content)
+    with open(args.weather_file, "r", encoding="utf-8") as f:
+        weather_content = f.read()
+
+    run_shadow_pass(args.legacy_dir, args.legacy_exp, micro_content, macro_content, weather_content)
